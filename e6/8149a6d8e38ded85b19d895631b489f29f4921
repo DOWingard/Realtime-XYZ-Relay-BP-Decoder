@@ -1,0 +1,14 @@
+.gitignore
+  h_ad89bc2dabc3b0 12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "e68149a6d8e38ded85b19d895631b489f29f4921",
+  "prompts": {},
+  "humans": {
+    "h_ad89bc2dabc3b0": {
+      "author": "Derek Wingard <derekwingard@gmail.com>"
+    }
+  }
+}
