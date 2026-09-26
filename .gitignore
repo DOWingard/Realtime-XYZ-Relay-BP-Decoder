@@ -9,6 +9,7 @@ CONTEXT/
 
 # System Prompt
 AGENTS.md
+CLAUDE.md 
 
 # CMake build output
 build/
