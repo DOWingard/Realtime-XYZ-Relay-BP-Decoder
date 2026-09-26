@@ -1,0 +1,14 @@
+# loose files and project notes
+CONTEXT/
+
+# Environment Variables
+.env
+
+# Research wiki
+.mcp.json 
+
+# System Prompt
+AGENTS.md
+
+# CMake build output
+build/
