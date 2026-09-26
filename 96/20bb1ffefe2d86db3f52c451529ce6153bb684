@@ -1,0 +1,29 @@
+.clang-tidy
+  s_12580115c4206e::t_94aa5b4b5f6f44 1-12
+.gitignore
+  s_12580115c4206e::t_db8bf61d62f657 1-14
+Makefile
+  s_12580115c4206e::t_844e890e06b33b 1-47
+include/realtimedecoder/decoder.hpp
+  s_12580115c4206e::t_67e762074e0711 1-7
+src/CMakeLists.txt
+  s_12580115c4206e::t_5147d0c212bb10 1-10
+test/decoder_test.cpp
+  s_12580115c4206e::t_4f83b58bebc8dc 1-7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "9620bb1ffefe2d86db3f52c451529ce6153bb684",
+  "prompts": {},
+  "sessions": {
+    "s_12580115c4206e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "176175b9-ff9f-4f02-9ae5-af245a868550",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Derek Wingard <derekwingard@gmail.com>"
+    }
+  }
+}
