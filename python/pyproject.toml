@@ -1,0 +1,34 @@
+[project]
+name = "rtd"
+version = "0.1.0"
+description = "Circuit generation and syndrome sampling for the real-time Relay-BP decoder"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=2.0",
+    "scipy>=1.11",
+    "stim>=1.15",
+]
+
+[project.scripts]
+rtd-sample = "rtd.sample:main"
+rtd-export = "rtd.export:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+]
+# IBM's relay_bp (reference decoder and DEM -> check-matrix conversion), pinned to the
+# commit the C++ decoder is checked against. Builds a Rust extension on install.
+reference = [
+    "relay-bp[stim] @ git+https://github.com/trmue/relay@d185194ba0cb4101ced4340d82b2ee6d42f225f0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/rtd"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
