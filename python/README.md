@@ -62,6 +62,76 @@ default `decomposed_hyperedges=None`. Passing `False` makes `from_dem` return th
 (graphlike) matrices instead, so the export always checks the result against a direct parse of the
 error model: one column per fault, in model order.
 
+## Golden outputs
+
+`rtd-golden` decodes syndromes with `relay_bp` and saves everything the C++ decoder must
+reproduce bit for bit. The algorithm flags have no defaults, because `relay_bp`'s Python defaults
+differ from the Relay-BP paper. A missing flag is an error that names it, and so is a flag that
+belongs to the other decoder.
+
+```sh
+uv run --group reference rtd-golden \
+    --artifact ../data/artifacts/gross_choi_p0.003 \
+    --shots ../data/shots/gross_choi_p0.003_s12345 --first 0 --count 100 \
+    --decoder relay --float f32 --alpha none --alpha-scaling 1.0 --gamma0 0.125 \
+    --pre-iter 80 --num-sets 600 --set-max-iter 60 --stopping nconv --stop-nconv 5 \
+    --gamma-rows 64 --gamma-seed 7 --gamma-interval -0.24 0.66 \
+    --posterior-shots 10 --workers 10 --out ../data/golden/gross_choi_p0.003/relay5_f32
+```
+
+- `--decoder min_sum` needs `--max-iter`. `--decoder relay` needs `--pre-iter` (iteration limit of
+  leg 0), `--num-sets` (legs after leg 0), `--set-max-iter`, `--stopping {pre_iter,nconv,all}`,
+  `--stop-nconv`, and the memory-strength table flags `--gamma-rows T --gamma-seed --gamma-interval LO HI`.
+- `--alpha` is the check-message scale. It takes a number, `none` (scale 1), or `0` for
+  `relay_bp`'s iteration-dependent rule 1 - 2^-(t/`alpha-scaling`). In that rule t = 1, 2, ...
+  counts the iterations and restarts at 1 in every relay leg. `--gamma0 none` disables memory. Relay legs then
+  ignore their memory strengths and each leg is plain BP.
+- Syndromes come from `--shots DIR --first F --count C`, or from `--single-columns K --seed S`.
+  The second option decodes the zero syndrome followed by the columns H[:, j] of K distinct columns
+  drawn with `numpy.random.default_rng(S).choice(n, K, replace=False)`.
+- `--posterior-shots K` saves the posterior log-likelihood ratios of the first K syndromes.
+
+Each shot is decoded by a newly constructed `relay_bp` decoder. The per-leg records come from the
+log file `relay_logging.out` that `RelayDecoder` writes into the current directory. The decoder
+does not reset its per-leg records between decodes, so each shot needs a fresh decoder. Every
+process runs in its own temporary directory, which lets `--workers` decode in parallel without
+changing any output. The decoding, success flag, iteration count and posterior match those of one
+reused decoder. Before anything is written, the tool checks that H e = syndrome (mod 2) holds
+exactly on the converged shots. It also checks that each shot's leg records are consistent with
+its iteration count and with the stopping rule.
+
+The weight W(e) is the sum of ln((1 - p_j) / p_j) over the columns j with e_j = 1. It uses
+`math.log` per column and adds the terms one at a time in ascending j. That is the same filter and
+order as `relay_bp`'s decoding quality, so the float64 result is reproducible. A pairwise or
+compensated sum can differ in the last bit.
+
+| File | Contents |
+|---|---|
+| `detectors.npy` | the syndromes decoded, `uint8` [S, m] |
+| `decoding.npy` | the estimate e, `uint8` [S, n] |
+| `success.npy` | 1 if H e = syndrome, `uint8` [S] |
+| `iterations.npy` | BP iterations, summed over all relay legs, `int64` [S] |
+| `weight.npy` | W(e), `float64` [S]; +inf where the decoder did not converge |
+| `posterior.npy` | posterior log-likelihood ratios of the first K shots, `float64` [K, n] |
+| `columns.npy` | single-column source: the column j behind syndrome row i + 1, `int64` [K] |
+| `gammas.npy` | relay: memory strengths `default_rng(seed).uniform(LO, HI, (T, n))`; leg r ≥ 1 uses row r mod T, so row 0 first serves leg T |
+| `legs_ptr.npy` | relay: the legs of shot s are entries `legs_ptr[s]` to `legs_ptr[s+1] - 1` of the three leg arrays, `int64` [S + 1] |
+| `leg_iterations.npy` | relay: iterations per leg, leg 0 first, `int64` [L] |
+| `leg_converged.npy` | relay: 1 if the leg's hard decision satisfied the syndrome, `uint8` [L] |
+| `leg_unique_best.npy` | relay: 1 on the returned leg when no other converged leg reached the same weight, `uint8` [L] |
+| `manifest.json` | every constructor argument, input checksums (artifact files, shots `detectors.npy`), versions, timing, summary and output checksums |
+
+The manifest records input paths relative to the working directory when they lie inside it, and
+otherwise only their final component, so a committed manifest holds no machine-specific paths.
+
+Stopping rules as `relay_bp` implements them:
+- `nconv` ends after `--stop-nconv` converged legs, counting leg 0.
+- `all` always runs all legs.
+- `pre_iter` stops after leg 0 only if leg 0 converged. Otherwise it runs every leg.
+
+The returned result comes from the converged leg with the lowest weight, taking the earliest leg
+on ties. If no leg converges, it comes from leg 0.
+
 ## Circuit model
 
 - **Syndrome cycle.** The depth-8 cycle of Bravyi et al., *High-threshold and low-overhead

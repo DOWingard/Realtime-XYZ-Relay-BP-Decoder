@@ -12,6 +12,7 @@ dependencies = [
 [project.scripts]
 rtd-sample = "rtd.sample:main"
 rtd-export = "rtd.export:main"
+rtd-golden = "rtd.golden:main"
 
 [dependency-groups]
 dev = [
