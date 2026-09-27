@@ -1,0 +1,69 @@
+python/pyproject.toml
+  s_b57d46f0e07795::t_f255256cdd0cae 1-7,9-13,15-18,24-34
+  s_b57d46f0e07795::t_ecc4b45fce47d1 14,19-23
+  s_b57d46f0e07795::t_f5c1ead75194f6 8
+python/tests/parity.py
+  s_b57d46f0e07795::t_27d56ea3118746 1-7,13-22,39-108,114-129,138,144,149-150
+  s_b57d46f0e07795::t_bab0599ba76e67 8-12
+  s_b57d46f0e07795::t_138344f4d91d14 38
+  s_b57d46f0e07795::t_8a2ac2e1a3fd82 109-113
+  s_b57d46f0e07795::t_27280e6b671f7b 130-137,139-143,145-148
+  s_b57d46f0e07795::t_77cfee6fd62c81 23-37
+python/src/rtd/log.py
+  s_b57d46f0e07795::t_f08049b2574ae3 1-37
+python/tests/test_circuit.py
+  s_b57d46f0e07795::t_0122e896d10606 1-48
+python/tests/test_reference_parity.py
+  s_b57d46f0e07795::t_37a38597c3b9ac 1-48
+python/src/rtd/export.py
+  s_b57d46f0e07795::t_e17f360fac9f92 1-278
+python/tests/test_export.py
+  s_b57d46f0e07795::t_92044ef5d0bf8e 1-55
+python/src/rtd/__init__.py
+  s_b57d46f0e07795::t_22b941baddbd4d 1
+python/src/rtd/sample.py
+  s_b57d46f0e07795::t_1a4772cdf3c082 189,193
+  s_b57d46f0e07795::t_35714db9f0fe54 1-105,107-188,190-192,194-200
+  s_b57d46f0e07795::t_59545415ba78a7 106
+python/tests/test_bb_code.py
+  s_b57d46f0e07795::t_859963fabdbef1 1-39
+python/tests/test_gf2.py
+  s_b57d46f0e07795::t_e4d27d1da56307 1-27
+python/src/rtd/circuit.py
+  s_b57d46f0e07795::t_de91b05ba444bd 222
+  s_b57d46f0e07795::t_7626846ee17308 156-160
+  s_b57d46f0e07795::t_4455bc2b9d0551 1-27,35-155,161-201,203-205,208-221,223-266,268-279
+  s_b57d46f0e07795::t_7e41d28d62c03a 267
+  s_b57d46f0e07795::t_4da96c6d9b11db 28-34
+  s_b57d46f0e07795::t_d741b06860f6fc 202,206-207
+python/src/rtd/gf2.py
+  s_b57d46f0e07795::t_2ef716532326c2 1-61
+python/README.md
+  s_b57d46f0e07795::t_5a1317c257e39a 86-88
+  s_b57d46f0e07795::t_c507c955eb922a 1-34,65-85,89
+  s_b57d46f0e07795::t_a03a1c32f8ab12 35-64
+python/src/rtd/noise.py
+  s_b57d46f0e07795::t_e8d0f1faae8771 1-34
+python/src/rtd/bb_code.py
+  s_b57d46f0e07795::t_8c3f7e44bf992f 15
+  s_b57d46f0e07795::t_b75cbfd90b4aa7 1-14,16-154,160
+  s_b57d46f0e07795::t_a56ff6474e5e59 155-159,161-167
+python/uv.lock
+  s_b57d46f0e07795::t_04e48522eea2ce 1-1147
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "7b654a2790d639f1b0f9014722efef3a7443cfe7",
+  "prompts": {},
+  "sessions": {
+    "s_b57d46f0e07795": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c720ce89-319a-445c-a140-3cfaa555f78a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Derek Wingard <derekwingard@gmail.com>"
+    }
+  }
+}
