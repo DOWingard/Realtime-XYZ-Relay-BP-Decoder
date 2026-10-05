@@ -1,0 +1,22 @@
+README.md
+  s_2cbe439dfd3da1::t_f1dbcf27d2c54d 3-85,934-947
+  s_2cbe439dfd3da1::t_0fb4ca86b995a0 948-951
+LICENSE
+  s_2cbe439dfd3da1::t_cca51c63aac69e 1-73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "afcc607cee5dc64717191a563706ab0dc5c07515",
+  "prompts": {},
+  "sessions": {
+    "s_2cbe439dfd3da1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "89eace64-66d1-425c-b116-6b14c23a4171",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Derek Wingard <derekwingard@gmail.com>"
+    }
+  }
+}
