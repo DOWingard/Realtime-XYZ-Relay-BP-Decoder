@@ -1,0 +1,190 @@
+{
+  "format_version": 1,
+  "created": "2026-09-30T04:37:32.835936+00:00",
+  "artifact": {
+    "path": "test/fixtures/bb18_choi_r9/artifact",
+    "manifest_sha256": "a821afa5f5252bb96412bcf39b82ce7535fcf7c557978faa9c459494aa8add80"
+  },
+  "shots": {
+    "path": "test/fixtures/bb18_choi_r9/shots",
+    "first": 0,
+    "count": 100,
+    "detectors_sha256": "70338c97a24d300aa91ae055dad56b0212f16eedc17b55965cdd4de40d124902",
+    "observables_sha256": "14eacef9d00863db835a52c63d72acbc0dd9c54d12630cf08c81dbc6a1baa323"
+  },
+  "first": 0,
+  "count": 100,
+  "rounds": 9,
+  "window": {
+    "mode": "sliding",
+    "width": 4,
+    "commit": 2,
+    "converge_rounds": 3,
+    "boundary": "uniform",
+    "on_failure": "flag",
+    "max_deferrals": 0,
+    "iteration_cap": 150
+  },
+  "decoder": {
+    "arithmetic": "int4.2.8",
+    "gamma0": 0.125,
+    "pre_iter": 30,
+    "set_max_iter": 20,
+    "num_sets": 12,
+    "stopping": {
+      "rule": "after_n_converged",
+      "count": 3
+    },
+    "alpha": {
+      "rule": "adaptive",
+      "scaling": 1.0
+    },
+    "inner": "rtd.fixed_ref integer emulator"
+  },
+  "fixed_point_choices": {
+    "rounding": "round half away from zero, for S*lambda and for (1 - gamma)*M",
+    "saturation": "bias and stored marginal clip to +-(2^N - 1); nu clips to the same range",
+    "hard_decision": "e_j = 1 when the unsaturated sigma_j <= 0",
+    "accumulator": "exact (no overflow): sigma and every partial sum",
+    "alpha": "alpha*x = x - (x >> k); adaptive: k = t + 1, t = iteration index within the leg",
+    "memory_strength": "beta_int = round((1 - gamma) M) clipped to [0, 2M]; gamma*x = x - beta(x)x",
+    "multiplier": "beta(x)x = sign(x) sum_{bit b of |x|} floor(beta_int 2^b / M)",
+    "first_iteration": "the first check pass of every leg reads lambda_int (messages restart from the priors)",
+    "marginal_init": "M = lambda_int at the start of a decode; kept from leg to leg",
+    "weight": "sum of lambda_int over the support, divided by S once"
+  },
+  "gamma": {
+    "rows": 3,
+    "seed": 17,
+    "low": -0.24,
+    "high": 0.66
+  },
+  "gamma_table": {
+    "generator": "numpy.random.default_rng([seed, shape]).uniform(low, high, size=(rows, shape_columns))",
+    "leg_row": "relay leg r >= 1 uses row r mod rows"
+  },
+  "num_shapes": 1,
+  "num_positions": 5,
+  "plan": {
+    "spec": {
+      "width": 4,
+      "commit": 2,
+      "converge_rounds": 3,
+      "boundary": "uniform",
+      "on_failure": "flag",
+      "max_deferrals": 0
+    },
+    "rounds_total": 10,
+    "detectors_per_round": 18,
+    "num_positions": 5,
+    "shapes": [
+      {
+        "index": 0,
+        "rows": 72,
+        "columns": 2664,
+        "edges": 13815,
+        "merged_columns": 81
+      }
+    ],
+    "placements": [
+      {
+        "window": 0,
+        "attempt": 0,
+        "shape": 0,
+        "first_round": 1,
+        "rounds": 4,
+        "commit_rounds": 2,
+        "final": false
+      },
+      {
+        "window": 1,
+        "attempt": 0,
+        "shape": 0,
+        "first_round": 3,
+        "rounds": 4,
+        "commit_rounds": 2,
+        "final": false
+      },
+      {
+        "window": 2,
+        "attempt": 0,
+        "shape": 0,
+        "first_round": 5,
+        "rounds": 4,
+        "commit_rounds": 2,
+        "final": false
+      },
+      {
+        "window": 3,
+        "attempt": 0,
+        "shape": 0,
+        "first_round": 7,
+        "rounds": 4,
+        "commit_rounds": 2,
+        "final": false
+      },
+      {
+        "window": 4,
+        "attempt": 0,
+        "shape": 0,
+        "first_round": 9,
+        "rounds": 4,
+        "commit_rounds": 2,
+        "final": false
+      }
+    ]
+  },
+  "weights": "win_weight: sum of lambda_int over the returned support / S; win_committed_weight: math.log((1 - p) / p) per committed local column, summed in ascending local index (the window layer's rule, in double)",
+  "skipped_windows": "after a final placement is committed the remaining positions are not decoded; their records are those of an empty window (attempts 0, converged 1, all counts 0)",
+  "shots_dir_compat": "sha256['circuit.stim'] is the artifact's source-circuit checksum, so this directory is accepted as rtd_decode --shots",
+  "versions": {
+    "numpy": "2.5.3",
+    "scipy": "1.18.1",
+    "rtd": "0.1.0"
+  },
+  "timing": {
+    "decode_seconds": 33.22088344200165,
+    "total_seconds": 33.573905600002035,
+    "workers": 3
+  },
+  "summary": {
+    "shots": 100,
+    "windows_decoded": 500,
+    "windows_not_converged": 211,
+    "windows_cap_hit": 282,
+    "windows_deferred": 0,
+    "windows_skipped_after_final": 0,
+    "shots_all_windows_converged": 20,
+    "flagged_shots": 80,
+    "logical_failures": 97,
+    "virtual_commits": 278,
+    "mean_iterations_per_shot": 522.01,
+    "max_window_iterations": 150
+  },
+  "sha256": {
+    "circuit.stim": "1be222a3042d01517fae5e417c43e087a438c26137e9f3752a940e9b29956f2f",
+    "commit_faults.npy": "5799266fd5639a49186c8ef340c7c888fb481d1a1bc8e18781078d1f92886001",
+    "commit_ptr.npy": "31af362b374d6985c7264bf403d0024517f17b8e089c6037411742e8af2d2f2c",
+    "detectors.npy": "70338c97a24d300aa91ae055dad56b0212f16eedc17b55965cdd4de40d124902",
+    "flagged.npy": "5d5b782d19b93cd3e7810a49bac7d3cf93cd07a0505edecca91dff447d40b4a3",
+    "gammas/shape_0.npy": "51ad9750b2c219a9146087ee71e1aaff0d9b0132420dbf4eebdc7bcbb137ecba",
+    "iterations.npy": "a07aa5c939b73301a9a20ec19c58a5e663e58a7f33520de43eb25f61075cf600",
+    "legs.npy": "6312481574252c74156d0ffb9898413fdbb0be791ba1d833e7b9ebbea5741f0d",
+    "logical_failure.npy": "8a11e0f185535c4a948f7cd42bc5fd070f971f30863593dca5e3bc70852a8263",
+    "observables.npy": "14eacef9d00863db835a52c63d72acbc0dd9c54d12630cf08c81dbc6a1baa323",
+    "predicted_observables.npy": "b747a8d7ca11d4de1a9d61f79d2408d062f8ec7013bc23b12dd7cc1fd0024489",
+    "spec.json": "e71494efb441a463c1c57ca5ffa11c2500776c8b8aa12ff7e0c301c7a67e5e52",
+    "success.npy": "7aaa7689721b7541e5e569f5fca882a4b628816748230fb4f52bb859b879790b",
+    "weight.npy": "fbb206526b36858d440855bd760bd69c0af3bbd08b9f47dd4cbb6582fc3cf1f6",
+    "win_attempts.npy": "713bc1f8cffe324c9f26baf92a4705046f6f14057614af9842b53ab1a370bca1",
+    "win_cap_hit.npy": "8732959e1e14abe33eae7cd3c426077efa0be71b3a09972f0cd8b2cee1f1f5c6",
+    "win_committed_weight.npy": "2bac2f09f296f0308521d2ee20bdd4590e1ce0fef97dfece96c973f6dda093d5",
+    "win_converged.npy": "34da552ec82c8838046c494dd176557ae731acf69af95527219518c95c2b0c6a",
+    "win_flagged.npy": "cc7495a2e64a1a416d57df1e374b89b913fa74ad414714d653b6bca6521db436",
+    "win_iterations.npy": "5c13568b415facd7b6ad2ae7bfb26c06383924df32ae7cd1dbdea3651f3a8c6a",
+    "win_legs.npy": "e1d3c28c6a8350697dadfc6fb98e564e70e1113a85f4269f2237bba0589e8189",
+    "win_unexplained.npy": "d546df679fe0f89a8807418db653acbef902b50deb35b7d5fbc2b86f4aecb312",
+    "win_virtual.npy": "18b3d60941ab3af6c979f36544be60172e339b24140b51085a0c5ddcbe4ec791",
+    "win_weight.npy": "0ae372674d51ed6e17c6370f5cb70733f1db708c798749f97b66ec2b14c27863"
+  }
+}

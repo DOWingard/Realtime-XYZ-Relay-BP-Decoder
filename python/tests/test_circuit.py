@@ -46,3 +46,45 @@ def test_noise_model_rejects_bad_probability():
 def test_rounds_must_be_positive():
     with pytest.raises(ValueError):
         build_memory_circuit(get_code("bb18"), 0, "z", NoiseModel.uniform(1e-3))
+
+
+def _dem_by_detector_set(dem, relabel=None):
+    """{(sorted detectors, sorted observables): summed probability} of a flattened detector error model."""
+    out: dict = {}
+    for inst in dem.flattened():
+        if inst.type != "error":
+            continue
+        dets = sorted((relabel[t.val] if relabel is not None else t.val) for t in inst.targets_copy() if t.is_relative_detector_id())
+        obs = sorted(t.val for t in inst.targets_copy() if t.is_logical_observable_id())
+        key = (tuple(dets), tuple(obs))
+        out[key] = out.get(key, 0.0) + inst.args_copy()[0]
+    return out
+
+
+@pytest.mark.parametrize("relay_bp_compat", [False, True])
+def test_choi_readout_in_round_order(relay_bp_compat):
+    code = get_code("bb18")
+    noise = NoiseModel.uniform(3e-3)
+    native = build_memory_circuit(code, 3, "choi", noise, relay_bp_compat=relay_bp_compat)
+    ordered = build_memory_circuit(code, 3, "choi", noise, relay_bp_compat=relay_bp_compat, readout_in_round_order=True)
+    check_deterministic(ordered.circuit)
+    info, h = ordered.detectors, code.half
+    # Every round, the final layer included, lists (type, check) in the same order: Z checks, then X checks.
+    key = (info.kind.astype(int) * h + info.check).reshape(4, 2 * h)
+    assert (key == key[0]).all() and list(key[0][:h]) == [DETECTOR_Z * h + i for i in range(h)]
+    assert not (native.detectors.kind.reshape(4, 2 * h) == native.detectors.kind.reshape(4, 2 * h)[0]).all()
+    # Same detector error model up to relabelling the final layer: native detector d is ordered detector perm[d].
+    m = native.circuit.num_detectors
+    pos = {(int(t), int(c), int(r)): i for i, (t, c, r) in enumerate(zip(info.kind, info.check, info.round, strict=True))}
+    perm = [pos[(int(t), int(c), int(r))] for t, c, r in zip(native.detectors.kind, native.detectors.check, native.detectors.round, strict=True)]
+    assert sorted(perm) == list(range(m)) and perm[: 3 * 2 * h] == list(range(3 * 2 * h))
+    a = _dem_by_detector_set(native.circuit.detector_error_model(), relabel=perm)
+    b = _dem_by_detector_set(ordered.circuit.detector_error_model())
+    assert a.keys() == b.keys() and all(abs(a[k] - b[k]) < 1e-15 for k in a)
+    # The default order is unchanged (existing circuits keep their checksums).
+    assert str(native.circuit) == str(build_memory_circuit(code, 3, "choi", noise, relay_bp_compat=relay_bp_compat).circuit)
+
+
+def test_readout_in_round_order_needs_choi():
+    with pytest.raises(ValueError, match="choi"):
+        build_memory_circuit(get_code("bb18"), 3, "z", NoiseModel.uniform(1e-3), readout_in_round_order=True)

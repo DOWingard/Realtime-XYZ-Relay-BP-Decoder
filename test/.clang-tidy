@@ -1,0 +1,15 @@
+# Tests inherit the first-party configuration; these checks are off here because their premise
+# does not hold for test code.
+# - random-generator-seed: generators are seeded with constants so that a failure reproduces.
+# - throwing-static-initialization: an exception while building a static test table ends the
+#   test binary at start-up, which is a loud failure and all a test needs.
+# - non-private-member-variables-in-classes: test doubles and fixtures expose what they record
+#   for the assertions to read.
+# - unchecked-optional-access: an ASSERT_TRUE on the optional precedes each access; the check
+#   cannot see through the gtest macro.
+InheritParentConfig: true
+Checks: >
+  -bugprone-random-generator-seed,
+  -bugprone-throwing-static-initialization,
+  -cppcoreguidelines-non-private-member-variables-in-classes,
+  -bugprone-unchecked-optional-access

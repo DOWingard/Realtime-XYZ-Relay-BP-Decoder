@@ -1,0 +1,72 @@
+{
+  "format_version": 1,
+  "created": "2026-09-27T04:15:14.740662+00:00",
+  "decoder": "min_sum",
+  "float": "f64",
+  "relay_bp_class": "MinSumBPDecoderF64",
+  "fresh_decoder_per_shot": true,
+  "config": {
+    "check_matrix": "artifact H as scipy.sparse.csr_matrix, uint8",
+    "error_priors": "artifact priors.npy",
+    "max_iter": 50,
+    "alpha": null,
+    "alpha_iteration_scaling_factor": 1.0,
+    "gamma0": null,
+    "data_scale_value": null,
+    "max_data_value": null,
+    "int_bits": null,
+    "frac_bits": null
+  },
+  "artifact": {
+    "path": "test/fixtures/bb18_choi/artifact",
+    "num_detectors": 72,
+    "num_columns": 2268,
+    "sha256": {
+      "H_indptr.npy": "b194dab5eb27bea94dc728d15108dccef2cb234835954c0112eb3eab6081c90c",
+      "H_indices.npy": "b63a5307db9d5499d047fd81b411423da717d29b175a4b367639e699a99c34a5",
+      "priors.npy": "9a54787cb2001e672003f43f6bea297025cd278656d74ea6b778505ed7a466b9"
+    }
+  },
+  "syndromes": {
+    "type": "shots",
+    "path": "bb18_shots",
+    "first": 0,
+    "count": 100,
+    "detectors_sha256": "da0c0d771eedb518d68de5a3979bcf9953a9bc69bc218a32934d5e92d5f5a0e8"
+  },
+  "num_shots": 100,
+  "posterior_shots": 5,
+  "versions": {
+    "relay_bp": {
+      "version": "0.2.2",
+      "commit": "d185194ba0cb4101ced4340d82b2ee6d42f225f0"
+    },
+    "numpy": "2.5.3",
+    "scipy": "1.18.1",
+    "stim": "1.16.0",
+    "rtd": "0.1.0"
+  },
+  "timing": {
+    "workers": 6,
+    "total_seconds": 0.5760148870031117,
+    "decode_wall_seconds": 0.5588363429997116,
+    "construct_seconds_sum": 0.25366516603389755,
+    "decode_seconds_sum": 0.4295727648859611,
+    "seconds_per_iteration": 0.00010886283955548938
+  },
+  "summary": {
+    "shots": 100,
+    "converged": 31,
+    "converged_fraction": 0.31,
+    "mean_iterations": 39.46,
+    "max_iterations": 50
+  },
+  "sha256": {
+    "decoding.npy": "7d16d7b9af0cbe4b2ce33ead64f0334af89061e498f042746ee6aa112c269bb5",
+    "detectors.npy": "c3e0fc1afb9c62fd08621b9e9d9067e933de22e34d43724268a2aac0c39ebe2b",
+    "iterations.npy": "484df6a8a4de897219cd3710ffa597309f34b0cce822eafbe4b2a4d181e9550e",
+    "posterior.npy": "d6e06ec6419f5156bee1c0d8757f2477b81a578f54564cb477a66333adb75cd3",
+    "success.npy": "e4d68a4f2b165b7143de916518b993ba3d607415b47e4e73027b6f4fa3d48f80",
+    "weight.npy": "b621d5ac3e663597b816acad42a2990d0dded3a9b4af9d37b626f77f33c675e5"
+  }
+}

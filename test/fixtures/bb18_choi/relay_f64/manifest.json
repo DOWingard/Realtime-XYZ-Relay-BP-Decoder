@@ -1,0 +1,101 @@
+{
+  "format_version": 1,
+  "created": "2026-09-27T04:15:19.978508+00:00",
+  "decoder": "relay",
+  "float": "f64",
+  "relay_bp_class": "RelayDecoderF64",
+  "fresh_decoder_per_shot": true,
+  "config": {
+    "check_matrix": "artifact H as scipy.sparse.csr_matrix, uint8",
+    "error_priors": "artifact priors.npy",
+    "alpha": null,
+    "alpha_iteration_scaling_factor": 1.0,
+    "gamma0": 0.125,
+    "data_scale_value": null,
+    "max_data_value": null,
+    "pre_iter": 20,
+    "num_sets": 40,
+    "set_max_iter": 15,
+    "gamma_dist_interval": [
+      -0.24,
+      0.66
+    ],
+    "explicit_gammas": "gammas.npy",
+    "stop_nconv": 3,
+    "stopping_criterion": "nconv",
+    "logging": true,
+    "seed": 0,
+    "gamma_table": {
+      "rows": 8,
+      "seed": 11,
+      "interval": [
+        -0.24,
+        0.66
+      ],
+      "generator": "numpy.random.default_rng(seed).uniform(interval[0], interval[1], size=(rows, num_columns))",
+      "leg_row": "relay leg r >= 1 uses row r mod rows"
+    }
+  },
+  "artifact": {
+    "path": "test/fixtures/bb18_choi/artifact",
+    "num_detectors": 72,
+    "num_columns": 2268,
+    "sha256": {
+      "H_indptr.npy": "b194dab5eb27bea94dc728d15108dccef2cb234835954c0112eb3eab6081c90c",
+      "H_indices.npy": "b63a5307db9d5499d047fd81b411423da717d29b175a4b367639e699a99c34a5",
+      "priors.npy": "9a54787cb2001e672003f43f6bea297025cd278656d74ea6b778505ed7a466b9"
+    }
+  },
+  "syndromes": {
+    "type": "shots",
+    "path": "bb18_shots",
+    "first": 0,
+    "count": 100,
+    "detectors_sha256": "da0c0d771eedb518d68de5a3979bcf9953a9bc69bc218a32934d5e92d5f5a0e8"
+  },
+  "num_shots": 100,
+  "posterior_shots": 5,
+  "versions": {
+    "relay_bp": {
+      "version": "0.2.2",
+      "commit": "d185194ba0cb4101ced4340d82b2ee6d42f225f0"
+    },
+    "numpy": "2.5.3",
+    "scipy": "1.18.1",
+    "stim": "1.16.0",
+    "rtd": "0.1.0"
+  },
+  "timing": {
+    "workers": 6,
+    "total_seconds": 1.4401626319886418,
+    "decode_wall_seconds": 1.421078179992037,
+    "construct_seconds_sum": 0.2481546239578165,
+    "decode_seconds_sum": 1.7323023259523325,
+    "seconds_per_iteration": 9.992514570560294e-05
+  },
+  "summary": {
+    "shots": 100,
+    "converged": 98,
+    "converged_fraction": 0.98,
+    "mean_iterations": 173.36,
+    "max_iterations": 620,
+    "legs": 1247,
+    "mean_legs": 12.47,
+    "converged_in_leg0": 33,
+    "converged_legs": 282,
+    "unique_best_legs": 56
+  },
+  "sha256": {
+    "decoding.npy": "50bbfcfe8855eec46f6e0614c810e8ee1c0cca30ede9a6387d07a75e0cf69730",
+    "detectors.npy": "c3e0fc1afb9c62fd08621b9e9d9067e933de22e34d43724268a2aac0c39ebe2b",
+    "gammas.npy": "a648546fbcfa93a66e7829525d3749d6db11a134c867fde054efa1fbbffc4d60",
+    "iterations.npy": "96fbfc255c3371be892dec40d08b0c1ae453ccebae284b92fcbc94729e5d0bd5",
+    "leg_converged.npy": "6bdc7d7840c5dadf3d73a93e9cf4b936f0d17f9107a3ef1dc79e3e67802fddfd",
+    "leg_iterations.npy": "206ca4bfc860dec1e7a13296eaa379789417788d0f3fc415c7219327c7998234",
+    "leg_unique_best.npy": "95d942db031f921d31e2443043bb876f0e7d68b4ca0dd47bc37779d8a49121a9",
+    "legs_ptr.npy": "a0be3bb3859e09b9d76d6ec31e88e51395f058c18925bd683a2a32908858011e",
+    "posterior.npy": "5ba21da6f9e97a5a890f5c99ca4a87d6389df7a4da160cd58bef666f7624d019",
+    "success.npy": "01ec75caf4cdc474f9881e986be48e7b60ce60ea2768b6934478ccbc753564ef",
+    "weight.npy": "253f2ab38ea71453ed69653e01b45fc08db623cf22d9d45f4be001e180331684"
+  }
+}

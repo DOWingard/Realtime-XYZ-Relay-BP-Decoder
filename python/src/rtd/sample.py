@@ -19,15 +19,17 @@ import json
 import logging
 import sys
 import time
+from collections.abc import Iterator
 from datetime import datetime, timezone
 from importlib.metadata import version
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import stim
 
 from rtd import log
-from rtd.bb_code import CODE_PARAMS, get_code
+from rtd.bb_code import CODE_PARAMS, BBCode, get_code
 from rtd.circuit import EXPERIMENTS, MemoryCircuit, build_memory_circuit
 from rtd.noise import NoiseModel
 
@@ -50,6 +52,11 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
         "--relay-bp-compat",
         action="store_true",
         help="reproduce the final-cycle idle-noise placement of relay_bp's reference circuits",
+    )
+    parser.add_argument(
+        "--readout-in-round-order",
+        action="store_true",
+        help="choi only: list the final layer's detectors in the noisy rounds' order (Z checks, then X checks)",
     )
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--verbose", action="store_true")
@@ -76,6 +83,61 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def code_record(code: BBCode) -> dict[str, Any]:
+    """The code's defining parameters as the shots manifest records them."""
+    return {"name": code.name, **CODE_PARAMS[code.name], "n": code.n, "k": code.k}
+
+
+def build_circuit(
+    code_name: str, experiment: str, p: float, rounds: int | None, relay_bp_compat: bool,
+    readout_in_round_order: bool = False,
+) -> tuple[BBCode, NoiseModel, MemoryCircuit]:
+    """The memory-experiment circuit under uniform noise p; rounds defaults to the code distance.
+    readout_in_round_order: see rtd.circuit (detector order of the choi experiment's final layer)."""
+    t0 = time.perf_counter()
+    code = get_code(code_name)
+    logger.info(
+        "code built",
+        extra={"code": code.name, "n": code.n, "k": code.k, "seconds": time.perf_counter() - t0},
+    )
+
+    rounds = rounds if rounds is not None else code.distance
+    noise = NoiseModel.uniform(p)
+    t0 = time.perf_counter()
+    mc = build_memory_circuit(code, rounds, experiment, noise, relay_bp_compat=relay_bp_compat,
+                              readout_in_round_order=readout_in_round_order)
+    circuit = mc.circuit
+    logger.info(
+        "circuit built",
+        extra={
+            "experiment": experiment,
+            "readout_in_round_order": readout_in_round_order,
+            "rounds": rounds,
+            "qubits": circuit.num_qubits,
+            "detectors": circuit.num_detectors,
+            "observables": circuit.num_observables,
+            "measurements": circuit.num_measurements,
+            "seconds": time.perf_counter() - t0,
+        },
+    )
+    return code, noise, mc
+
+
+def sample_batches(
+    circuit: stim.Circuit, shots: int, seed: int, batch: int
+) -> Iterator[tuple[int, int, np.ndarray, np.ndarray]]:
+    """Yields (first, end, detectors, observables) per batch of at most `batch` shots.
+
+    Stim's seeded output depends on how the shots are split into sample calls, so the same
+    (seed, shots, batch) always reproduces the same bits and a different batch size does not.
+    """
+    sampler = circuit.compile_detector_sampler(seed=seed)
+    for lo in range(0, shots, batch):
+        hi = min(lo + batch, shots)
+        dets, obs = sampler.sample(hi - lo, separate_observables=True)
+        yield lo, hi, dets, obs
+
+
 def sample_to_disk(mc: MemoryCircuit, shots: int, seed: int, batch: int, out: Path) -> dict[str, float]:
     circuit = mc.circuit
     detectors = np.lib.format.open_memmap(
@@ -84,13 +146,10 @@ def sample_to_disk(mc: MemoryCircuit, shots: int, seed: int, batch: int, out: Pa
     observables = np.lib.format.open_memmap(
         out / "observables.npy", mode="w+", dtype=np.uint8, shape=(shots, circuit.num_observables)
     )
-    sampler = circuit.compile_detector_sampler(seed=seed)
     fired = 0
     flipped = 0
     start = time.perf_counter()
-    for lo in range(0, shots, batch):
-        hi = min(lo + batch, shots)
-        dets, obs = sampler.sample(hi - lo, separate_observables=True)
+    for lo, hi, dets, obs in sample_batches(circuit, shots, seed, batch):
         detectors[lo:hi] = dets
         observables[lo:hi] = obs
         fired += int(dets.sum())
@@ -115,30 +174,10 @@ def run(args: argparse.Namespace) -> Path:
         raise FileExistsError(f"{out} is not empty; pass --overwrite to replace it")
     out.mkdir(parents=True, exist_ok=True)
 
-    t0 = time.perf_counter()
-    code = get_code(args.code)
-    logger.info(
-        "code built",
-        extra={"code": code.name, "n": code.n, "k": code.k, "seconds": time.perf_counter() - t0},
-    )
-
-    rounds = args.rounds if args.rounds is not None else code.distance
-    noise = NoiseModel.uniform(args.p)
-    t0 = time.perf_counter()
-    mc = build_memory_circuit(code, rounds, args.experiment, noise, relay_bp_compat=args.relay_bp_compat)
+    code, noise, mc = build_circuit(args.code, args.experiment, args.p, args.rounds, args.relay_bp_compat,
+                                    args.readout_in_round_order)
     circuit = mc.circuit
-    logger.info(
-        "circuit built",
-        extra={
-            "experiment": args.experiment,
-            "rounds": rounds,
-            "qubits": circuit.num_qubits,
-            "detectors": circuit.num_detectors,
-            "observables": circuit.num_observables,
-            "measurements": circuit.num_measurements,
-            "seconds": time.perf_counter() - t0,
-        },
-    )
+    rounds = mc.rounds
 
     check_deterministic(circuit)
     logger.info("noiseless circuit is deterministic")
@@ -157,11 +196,12 @@ def run(args: argparse.Namespace) -> Path:
     manifest = {
         "manifest_version": MANIFEST_VERSION,
         "created": datetime.now(timezone.utc).isoformat(),
-        "code": {"name": code.name, **CODE_PARAMS[code.name], "n": code.n, "k": code.k},
+        "code": code_record(code),
         "experiment": args.experiment,
         "rounds": rounds,
         "noise": noise.to_dict(),
         "relay_bp_compat": args.relay_bp_compat,
+        **({"readout_in_round_order": True} if args.readout_in_round_order else {}),
         "shots": args.shots,
         "seed": args.seed,
         "batch": args.batch,

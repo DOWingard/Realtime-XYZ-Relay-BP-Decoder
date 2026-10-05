@@ -1,0 +1,48 @@
+{
+  "manifest_version": 1,
+  "created": "2026-09-29T07:36:30.898403+00:00",
+  "code": {
+    "name": "bb18",
+    "l": 3,
+    "m": 3,
+    "a_poly": "x+1+y",
+    "b_poly": "x+1+xy^2",
+    "distance": 3,
+    "n": 18,
+    "k": 4
+  },
+  "experiment": "choi",
+  "rounds": 9,
+  "noise": {
+    "p_cx": 0.01,
+    "p_reset": 0.01,
+    "p_meas": 0.01,
+    "p_idle": 0.01
+  },
+  "relay_bp_compat": false,
+  "shots": 100,
+  "seed": 909,
+  "batch": 100000,
+  "counts": {
+    "qubits": 40,
+    "detectors": 180,
+    "observables": 8,
+    "measurements": 197
+  },
+  "versions": {
+    "stim": "1.16.0",
+    "numpy": "2.5.3",
+    "rtd": "0.1.0"
+  },
+  "sha256": {
+    "circuit.stim": "1be222a3042d01517fae5e417c43e087a438c26137e9f3752a940e9b29956f2f",
+    "detectors.npy": "70338c97a24d300aa91ae055dad56b0212f16eedc17b55965cdd4de40d124902",
+    "observables.npy": "14eacef9d00863db835a52c63d72acbc0dd9c54d12630cf08c81dbc6a1baa323"
+  },
+  "sampling": {
+    "seconds": 0.0004628640003829787,
+    "shots_per_second": 216046.18185311218,
+    "mean_detector_fire_rate": 0.246,
+    "fraction_shots_with_raw_observable_flip": 0.99
+  }
+}

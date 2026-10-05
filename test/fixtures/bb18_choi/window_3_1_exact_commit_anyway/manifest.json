@@ -1,0 +1,184 @@
+{
+  "format_version": 1,
+  "created": "2026-09-29T07:56:25.716376+00:00",
+  "artifact": {
+    "path": "test/fixtures/bb18_choi/artifact",
+    "manifest_sha256": "f49c75931d541c81b9b96e322de7ce0d1fb71b3e7914760b5b3a060980ee8a9c"
+  },
+  "shots": {
+    "path": "bb18_shots",
+    "first": 0,
+    "count": 100,
+    "detectors_sha256": "da0c0d771eedb518d68de5a3979bcf9953a9bc69bc218a32934d5e92d5f5a0e8",
+    "observables_sha256": "95b72262c86fa21c052b319534d69ca07fd4cbd21ea20d1115a3617f7e960a49"
+  },
+  "first": 0,
+  "count": 100,
+  "rounds": 3,
+  "window": {
+    "mode": "sliding",
+    "width": 3,
+    "commit": 1,
+    "converge_rounds": 3,
+    "boundary": "exact",
+    "on_failure": "commit_anyway",
+    "max_deferrals": 0,
+    "iteration_cap": null
+  },
+  "decoder": {
+    "float": "f32",
+    "gamma0": 0.125,
+    "pre_iter": 80,
+    "set_max_iter": 60,
+    "num_sets": 50,
+    "stopping": {
+      "rule": "after_n_converged",
+      "count": 3
+    },
+    "alpha": {
+      "rule": "constant",
+      "value": 1.0
+    },
+    "inner": "relay_bp, one freshly constructed decoder per window decode"
+  },
+  "gamma": {
+    "rows": 3,
+    "seed": 17,
+    "low": -0.24,
+    "high": 0.66
+  },
+  "config": {
+    "check_matrix": "window shape H as scipy.sparse.csr_matrix, uint8",
+    "error_priors": "window shape priors",
+    "alpha": null,
+    "alpha_iteration_scaling_factor": 1.0,
+    "gamma0": 0.125,
+    "data_scale_value": null,
+    "max_data_value": null,
+    "pre_iter": 80,
+    "num_sets": 50,
+    "set_max_iter": 60,
+    "gamma_dist_interval": [
+      -0.24,
+      0.66
+    ],
+    "explicit_gammas": "gammas/shape_<i>.npy",
+    "stop_nconv": 3,
+    "stopping_criterion": "nconv",
+    "logging": true,
+    "seed": 0,
+    "gamma_table": {
+      "rows": 3,
+      "seed": 17,
+      "interval": [
+        -0.24,
+        0.66
+      ],
+      "generator": "numpy.random.default_rng([seed, shape]).uniform(interval[0], interval[1], size=(rows, shape_columns))",
+      "leg_row": "relay leg r >= 1 uses row r mod rows"
+    }
+  },
+  "num_shapes": 2,
+  "num_positions": 2,
+  "plan": {
+    "spec": {
+      "width": 3,
+      "commit": 1,
+      "converge_rounds": 3,
+      "boundary": "exact",
+      "on_failure": "commit_anyway",
+      "max_deferrals": 0
+    },
+    "rounds_total": 4,
+    "detectors_per_round": 18,
+    "num_positions": 2,
+    "shapes": [
+      {
+        "index": 0,
+        "rows": 54,
+        "columns": 1899,
+        "edges": 9630,
+        "merged_columns": 81
+      },
+      {
+        "index": 1,
+        "rows": 54,
+        "columns": 1557,
+        "edges": 8433,
+        "merged_columns": 0
+      }
+    ],
+    "placements": [
+      {
+        "window": 0,
+        "attempt": 0,
+        "shape": 0,
+        "first_round": 1,
+        "rounds": 3,
+        "commit_rounds": 1,
+        "final": false
+      },
+      {
+        "window": 1,
+        "attempt": 0,
+        "shape": 1,
+        "first_round": 2,
+        "rounds": 3,
+        "commit_rounds": 3,
+        "final": true
+      }
+    ]
+  },
+  "weights": "math.log((1 - p) / p) per local column, summed in ascending local index",
+  "skipped_windows": "after a final placement is committed the remaining positions are not decoded; their records are those of an empty window (attempts 0, converged 1, all counts 0)",
+  "shots_dir_compat": "sha256['circuit.stim'] is the artifact's source-circuit checksum (the circuit is not copied), so this directory is accepted as rtd_decode --shots",
+  "relay_bp": {
+    "version": "0.2.2",
+    "commit": "d185194ba0cb4101ced4340d82b2ee6d42f225f0"
+  },
+  "versions": {
+    "numpy": "2.5.3",
+    "scipy": "1.18.1",
+    "rtd": "0.1.0"
+  },
+  "timing": {
+    "decode_seconds": 7.9056718269994235,
+    "total_seconds": 8.03838888700011,
+    "workers": 2
+  },
+  "summary": {
+    "shots": 100,
+    "windows_decoded": 200,
+    "windows_not_converged": 0,
+    "windows_deferred": 0,
+    "windows_skipped_after_final": 0,
+    "shots_all_windows_converged": 100,
+    "flagged_shots": 0,
+    "logical_failures": 41,
+    "virtual_commits": 0,
+    "mean_iterations_per_shot": 465.02,
+    "max_window_iterations": 3069
+  },
+  "sha256": {
+    "circuit.stim": "caaa894ebe3d76f60ff04102b53dda3e329716b965fbe553640f2f392284600b",
+    "commit_faults.npy": "8956dea516fcdf30cf4170a92dabbbdf5de8c3957d7facb8fc34cedc0605a62d",
+    "commit_ptr.npy": "85f12ad2c2e1de51c5c70687df72b72d03761ff476ad46113819275f141ac6c9",
+    "detectors.npy": "c3e0fc1afb9c62fd08621b9e9d9067e933de22e34d43724268a2aac0c39ebe2b",
+    "flagged.npy": "e045be5525402f8545d5f7024cdb828abedd7bd500cfa5ac6bca4e280aaaf5c5",
+    "gammas/shape_0.npy": "758796c2b5cff2fd91e544bf1ed7a7238f86e844fb931458c792daa41d836b73",
+    "gammas/shape_1.npy": "934eff0fda36e8186393eccaaf9b06bb25b23c0b2a2c690dd426362f3dc7a79c",
+    "logical_failure.npy": "4e294f0c6eda2e172337acf1f70b201d55de7a7e9ba0a5b3a602d2980576ea7e",
+    "observables.npy": "c1e2e71aaacb85f9b134196c3701e3283d1b411b83d1598c198a8eb29005eeac",
+    "predicted_observables.npy": "8d0cae9af3bcd05f46b3bf5aaf3839537b54bb0933c22828125507931b4ff61f",
+    "spec.json": "d42a7d4e23816231c3e2ffc9e0c2a960c007f2306204a186aeecc4aa125771ff",
+    "win_attempts.npy": "af37e5a7448f6083f06fe47e13a8ddb8362714620006bae44241a9b3986b9087",
+    "win_committed_weight.npy": "2b0861fc7bb12d53c41bbc921dd250856a8819a6ecbb2aadb3549ea95aa51e89",
+    "win_converged.npy": "af37e5a7448f6083f06fe47e13a8ddb8362714620006bae44241a9b3986b9087",
+    "win_flagged.npy": "0598d812d1de0d7278a398f5c6bd3d33e3c0bf0127b14a772c68de6e9c677b78",
+    "win_iterations.npy": "a0826c8f475ddbb7b313562761639dae96e62b0f80379f10b05aee71d69d1231",
+    "win_legs.npy": "d017ae17b878cd14db80df7735b2bc9183e94f77136a9ac7358b65c1da870163",
+    "win_unexplained.npy": "45d49813d95b9bd541f557fbecb99818cb76225d57afe3b42af25d08b7da8ef7",
+    "win_virtual.npy": "45d49813d95b9bd541f557fbecb99818cb76225d57afe3b42af25d08b7da8ef7",
+    "win_weight.npy": "ae47512c3509dea56ed3425502c1a00573e7da2e1a9f31c45db19d7937337c98"
+  }
+}

@@ -13,3 +13,14 @@ CLAUDE.md
 
 # CMake build output
 build/
+compile_commands.json
+
+# Python
+.venv/
+__pycache__/
+.pytest_cache/
+# The extension module, built into the package by CMake (RTD_ENABLE_PYTHON)
+python/src/rtd/_native*.so
+
+# Generated circuits and samples
+data/

@@ -1,0 +1,289 @@
+{
+  "format_version": 1,
+  "created": "2026-09-30T04:39:29.229717+00:00",
+  "artifact": {
+    "path": "test/fixtures/bb18_choi_r9/artifact",
+    "manifest_sha256": "a821afa5f5252bb96412bcf39b82ce7535fcf7c557978faa9c459494aa8add80"
+  },
+  "shots": {
+    "path": "test/fixtures/bb18_choi_r9/shots",
+    "first": 0,
+    "count": 100,
+    "detectors_sha256": "70338c97a24d300aa91ae055dad56b0212f16eedc17b55965cdd4de40d124902",
+    "observables_sha256": "14eacef9d00863db835a52c63d72acbc0dd9c54d12630cf08c81dbc6a1baa323"
+  },
+  "first": 0,
+  "count": 100,
+  "rounds": 9,
+  "window": {
+    "mode": "sliding",
+    "width": 5,
+    "commit": 2,
+    "converge_rounds": 5,
+    "boundary": "exact",
+    "on_failure": "defer",
+    "max_deferrals": 2,
+    "iteration_cap": null
+  },
+  "decoder": {
+    "arithmetic": "int6.2.8",
+    "gamma0": 0.125,
+    "pre_iter": 30,
+    "set_max_iter": 20,
+    "num_sets": 12,
+    "stopping": {
+      "rule": "after_leg0"
+    },
+    "alpha": {
+      "rule": "constant",
+      "value": 1.0
+    },
+    "inner": "rtd.fixed_ref integer emulator"
+  },
+  "fixed_point_choices": {
+    "rounding": "round half away from zero, for S*lambda and for (1 - gamma)*M",
+    "saturation": "bias and stored marginal clip to +-(2^N - 1); nu clips to the same range",
+    "hard_decision": "e_j = 1 when the unsaturated sigma_j <= 0",
+    "accumulator": "exact (no overflow): sigma and every partial sum",
+    "alpha": "alpha*x = x - (x >> k); adaptive: k = t + 1, t = iteration index within the leg",
+    "memory_strength": "beta_int = round((1 - gamma) M) clipped to [0, 2M]; gamma*x = x - beta(x)x",
+    "multiplier": "beta(x)x = sign(x) sum_{bit b of |x|} floor(beta_int 2^b / M)",
+    "first_iteration": "the first check pass of every leg reads lambda_int (messages restart from the priors)",
+    "marginal_init": "M = lambda_int at the start of a decode; kept from leg to leg",
+    "weight": "sum of lambda_int over the support, divided by S once"
+  },
+  "gamma": {
+    "rows": 3,
+    "seed": 17,
+    "low": -0.24,
+    "high": 0.66
+  },
+  "gamma_table": {
+    "generator": "numpy.random.default_rng([seed, shape]).uniform(low, high, size=(rows, shape_columns))",
+    "leg_row": "relay leg r >= 1 uses row r mod rows"
+  },
+  "num_shapes": 9,
+  "num_positions": 4,
+  "plan": {
+    "spec": {
+      "width": 5,
+      "commit": 2,
+      "converge_rounds": 5,
+      "boundary": "exact",
+      "on_failure": "defer",
+      "max_deferrals": 2
+    },
+    "rounds_total": 10,
+    "detectors_per_round": 18,
+    "num_positions": 4,
+    "shapes": [
+      {
+        "index": 0,
+        "rows": 90,
+        "columns": 3375,
+        "edges": 17694,
+        "merged_columns": 81
+      },
+      {
+        "index": 1,
+        "rows": 126,
+        "columns": 4851,
+        "edges": 25758,
+        "merged_columns": 81
+      },
+      {
+        "index": 2,
+        "rows": 162,
+        "columns": 6327,
+        "edges": 33822,
+        "merged_columns": 81
+      },
+      {
+        "index": 3,
+        "rows": 90,
+        "columns": 3402,
+        "edges": 17847,
+        "merged_columns": 81
+      },
+      {
+        "index": 4,
+        "rows": 126,
+        "columns": 4878,
+        "edges": 25911,
+        "merged_columns": 81
+      },
+      {
+        "index": 5,
+        "rows": 144,
+        "columns": 5247,
+        "edges": 28593,
+        "merged_columns": 0
+      },
+      {
+        "index": 6,
+        "rows": 90,
+        "columns": 3402,
+        "edges": 17847,
+        "merged_columns": 81
+      },
+      {
+        "index": 7,
+        "rows": 108,
+        "columns": 3771,
+        "edges": 20529,
+        "merged_columns": 0
+      },
+      {
+        "index": 8,
+        "rows": 72,
+        "columns": 2295,
+        "edges": 12465,
+        "merged_columns": 0
+      }
+    ],
+    "placements": [
+      {
+        "window": 0,
+        "attempt": 0,
+        "shape": 0,
+        "first_round": 1,
+        "rounds": 5,
+        "commit_rounds": 2,
+        "final": false
+      },
+      {
+        "window": 0,
+        "attempt": 1,
+        "shape": 1,
+        "first_round": 1,
+        "rounds": 7,
+        "commit_rounds": 2,
+        "final": false
+      },
+      {
+        "window": 0,
+        "attempt": 2,
+        "shape": 2,
+        "first_round": 1,
+        "rounds": 9,
+        "commit_rounds": 2,
+        "final": false
+      },
+      {
+        "window": 1,
+        "attempt": 0,
+        "shape": 3,
+        "first_round": 3,
+        "rounds": 5,
+        "commit_rounds": 2,
+        "final": false
+      },
+      {
+        "window": 1,
+        "attempt": 1,
+        "shape": 4,
+        "first_round": 3,
+        "rounds": 7,
+        "commit_rounds": 2,
+        "final": false
+      },
+      {
+        "window": 1,
+        "attempt": 2,
+        "shape": 5,
+        "first_round": 3,
+        "rounds": 8,
+        "commit_rounds": 8,
+        "final": true
+      },
+      {
+        "window": 2,
+        "attempt": 0,
+        "shape": 6,
+        "first_round": 5,
+        "rounds": 5,
+        "commit_rounds": 2,
+        "final": false
+      },
+      {
+        "window": 2,
+        "attempt": 1,
+        "shape": 7,
+        "first_round": 5,
+        "rounds": 6,
+        "commit_rounds": 6,
+        "final": true
+      },
+      {
+        "window": 3,
+        "attempt": 0,
+        "shape": 8,
+        "first_round": 7,
+        "rounds": 4,
+        "commit_rounds": 4,
+        "final": true
+      }
+    ]
+  },
+  "weights": "win_weight: sum of lambda_int over the returned support / S; win_committed_weight: math.log((1 - p) / p) per committed local column, summed in ascending local index (the window layer's rule, in double)",
+  "skipped_windows": "after a final placement is committed the remaining positions are not decoded; their records are those of an empty window (attempts 0, converged 1, all counts 0)",
+  "shots_dir_compat": "sha256['circuit.stim'] is the artifact's source-circuit checksum, so this directory is accepted as rtd_decode --shots",
+  "versions": {
+    "numpy": "2.5.3",
+    "scipy": "1.18.1",
+    "rtd": "0.1.0"
+  },
+  "timing": {
+    "decode_seconds": 112.9151454729872,
+    "total_seconds": 115.22507287599728,
+    "workers": 3
+  },
+  "summary": {
+    "shots": 100,
+    "windows_decoded": 332,
+    "windows_not_converged": 45,
+    "windows_cap_hit": 0,
+    "windows_deferred": 83,
+    "windows_skipped_after_final": 68,
+    "shots_all_windows_converged": 67,
+    "flagged_shots": 33,
+    "logical_failures": 90,
+    "virtual_commits": 0,
+    "mean_iterations_per_shot": 853.73,
+    "max_window_iterations": 810
+  },
+  "sha256": {
+    "circuit.stim": "1be222a3042d01517fae5e417c43e087a438c26137e9f3752a940e9b29956f2f",
+    "commit_faults.npy": "e355475905a4007cafa756180f1054f7fe1d5a63ec194d5e44d4b3fe8753cab0",
+    "commit_ptr.npy": "209566bdf9493db13e9090d47f756f58ddea4b051fb1434a572a38fd4158021b",
+    "detectors.npy": "70338c97a24d300aa91ae055dad56b0212f16eedc17b55965cdd4de40d124902",
+    "flagged.npy": "b0db69f3a03d10ee58648dd33672d9c192a28a03292ae06b1249c338737e6093",
+    "gammas/shape_0.npy": "9b2680bdfa79b801318ca6135a6901bf702bd94d00f3f1e821f5b6e8056d7d0b",
+    "gammas/shape_1.npy": "9f86833d15ffde455ac4d6aa95e395a2cb5b67b5ef73dd1ed53ab9b81add7759",
+    "gammas/shape_2.npy": "9e58b75071d305aa80c8e09b715b651a3603e0cedad4676ced710edbf28f85c1",
+    "gammas/shape_3.npy": "be9c433b3064a6670fc03df589b21f0b7df7d474cd6052696bc6e331ddc2f9c7",
+    "gammas/shape_4.npy": "99888e883014483ee9a7b2e43ff95190d95e39b99dc284e64f690f446b818709",
+    "gammas/shape_5.npy": "fffd96acd3b93bf8853f1dc4d79db26d88f075fa8329453e1d0c951e2dcc8673",
+    "gammas/shape_6.npy": "8bbf4f50977dcf7bd1c69954452c4a74b355d52a9cf1fe7b80a87c67d48ddd44",
+    "gammas/shape_7.npy": "1e501af0c2642192920b762462c049c4102274e12b3242269f5073ae6836655a",
+    "gammas/shape_8.npy": "f31f3b0661bc8d4d476de2d1d33d1a86622d3b1fedd78ce38e7cc6038de710c4",
+    "iterations.npy": "60592c68fa22b10e3ec9f13958a906cadcf964a800379c132c42b004b978a62b",
+    "legs.npy": "a3d5eb72a99d1f1e5227b07eb338cacce0af44fc7a2f084e8354c6716b763b90",
+    "logical_failure.npy": "acfa97cd7e3bff34e8a05134b17552e60f1a04a2a170e21f85d1f0beb21e5c1e",
+    "observables.npy": "14eacef9d00863db835a52c63d72acbc0dd9c54d12630cf08c81dbc6a1baa323",
+    "predicted_observables.npy": "e15ce7e211633520d0f62963574f2df5adda774ae69874e548e7efe5c01d9a03",
+    "spec.json": "b6d8885aa7d958a586f0ee15d6010bfdbb7432116eab9c221e19dcbc81206fd8",
+    "success.npy": "b2c18f242ef56cc74eae045347ffdad671528346a9e5aecb6f68be9202f775dd",
+    "weight.npy": "8f7ff7bfeac9c1d4aaa0659ce88ec8f658c2d59083ba5dbe5a1b5c9fc880b7ad",
+    "win_attempts.npy": "fad6e4b09df0811f12dbf212754cac9c8f2db1334075711361b4446bda4210fe",
+    "win_cap_hit.npy": "5366fc7cdd2a5d66893601b2337c573c2f590bcf31e1a19393b17d1a784bf56b",
+    "win_committed_weight.npy": "0d6803b1cc7e509b2046a209724fbe332636b7c7d83639a10e1e784f127720c5",
+    "win_converged.npy": "a312157827f10ac1281f58ec49e934c42ccb29921d7be19bb3abc5f62694a1be",
+    "win_flagged.npy": "66a0ce6db97c95e8da67504adbec0c81748c8e3fac77c792577ee3ae4e984bc2",
+    "win_iterations.npy": "55cd47329a54d9550d0b043a745512c6e8c69dbe7c1161e9254052de299de0bd",
+    "win_legs.npy": "07d35dbd6d4ee5a93e11e834b8a4280f441b6fb5953341d83c313f47e61a2464",
+    "win_unexplained.npy": "04efd9d5280bb69fa49ff937bbbb262074487081a1a9bf4a09dd402a8c23c3d2",
+    "win_virtual.npy": "aef79e3c8ae1bc6a9a69971b5d592265f94a3502a5116afc272f3ebf611b067b",
+    "win_weight.npy": "9d931027c8e37e844b5070744bcd59c3a1900d6df9beb80bc4f8e8339b151c76"
+  }
+}

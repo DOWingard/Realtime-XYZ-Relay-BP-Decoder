@@ -8,37 +8,50 @@
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/build/${presetName}",
             "cacheVariables": {
-                "CMAKE_CXX_COMPILER": "g++"
+                "CMAKE_CXX_COMPILER": "g++",
+                "RTD_WARNINGS_AS_ERRORS": "ON"
             }
         },
         {
             "name": "debug",
             "inherits": "base",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "RTD_ENABLE_BENCH": "OFF"
             }
         },
         {
             "name": "release",
             "inherits": "base",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "profile",
+            "displayName": "Release with symbols and frame pointers, for perf",
+            "inherits": "base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "CMAKE_CXX_FLAGS_RELWITHDEBINFO": "-O3 -g -DNDEBUG -fno-omit-frame-pointer"
             }
         },
         {
             "name": "asan",
             "inherits": "base",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "RTD_ENABLE_ASAN": "ON"
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "RTD_ENABLE_ASAN": "ON",
+                "RTD_ENABLE_BENCH": "OFF"
             }
         },
         {
             "name": "tsan",
             "inherits": "base",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "RTD_ENABLE_TSAN": "ON"
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "RTD_ENABLE_TSAN": "ON",
+                "RTD_ENABLE_BENCH": "OFF"
             }
         },
         {
@@ -47,19 +60,22 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_CXX_COMPILER": "clang++",
-                "RTD_ENABLE_CLANG_TIDY": "ON"
+                "RTD_ENABLE_CLANG_TIDY": "ON",
+                "RTD_ENABLE_CUDA": "ON"
             }
         }
     ],
     "buildPresets": [
         { "name": "debug", "configurePreset": "debug" },
         { "name": "release", "configurePreset": "release" },
+        { "name": "profile", "configurePreset": "profile" },
         { "name": "asan", "configurePreset": "asan" },
         { "name": "tsan", "configurePreset": "tsan" },
         { "name": "tidy", "configurePreset": "tidy" }
     ],
     "testPresets": [
         { "name": "debug", "configurePreset": "debug", "output": { "outputOnFailure": true } },
+        { "name": "release", "configurePreset": "release", "output": { "outputOnFailure": true } },
         { "name": "asan", "configurePreset": "asan", "output": { "outputOnFailure": true } },
         { "name": "tsan", "configurePreset": "tsan", "output": { "outputOnFailure": true } }
     ]

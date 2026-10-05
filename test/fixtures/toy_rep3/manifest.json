@@ -1,0 +1,60 @@
+{
+  "format_version": 1,
+  "created": "2026-09-29T07:21:34.954177+00:00",
+  "source_circuit": {
+    "path": "test/fixtures/toy_rep3/circuit.stim",
+    "sha256": "76de4e566bdba27ab5280937c038cb235af219cff51f3329936033240fbf0559"
+  },
+  "num_detectors": 14,
+  "num_columns": 30,
+  "num_observables": 1,
+  "nnz_H": 48,
+  "nnz_A": 6,
+  "row_degree": {
+    "min": 1,
+    "max": 4,
+    "mean": 3.4285714285714284,
+    "zero": 0
+  },
+  "column_degree": {
+    "min": 1,
+    "max": 2,
+    "mean": 1.6,
+    "zero": 0
+  },
+  "prior_range": [
+    0.01,
+    0.02
+  ],
+  "pruning": {
+    "threshold": 0.0,
+    "columns_in_model": 30,
+    "columns_pruned": 0
+  },
+  "from_dem": {
+    "decomposed_hyperedges": null,
+    "prune_decided_errors": true
+  },
+  "versions": {
+    "relay_bp": {
+      "version": "0.2.2",
+      "commit": "d185194ba0cb4101ced4340d82b2ee6d42f225f0"
+    },
+    "beliefmatching": "0.1.1",
+    "stim": "1.16.0",
+    "numpy": "2.5.3",
+    "scipy": "1.18.1",
+    "rtd": "0.1.0"
+  },
+  "sha256": {
+    "A_indices.npy": "1c74dfc2bf8f5ac33029f647af3176c86ef9efffa9b4892787225c2f3181be1a",
+    "A_indptr.npy": "716953028c5493553ffcfff0172b8c8059c61df3e292cf5d821a143ff3af6806",
+    "H_indices.npy": "f36bd7bdf4fc2f7792a5d8b7d5425287b58354e50a92370c68ea4048308d5556",
+    "H_indptr.npy": "014ddbfbc55dc2c752c24769c1e87756c1a87ac30651951ea3646afd85479ebc",
+    "col_to_dem.npy": "6108122e4bb7b189bac62a5b09866e98bce18a49002afafb217c0ca890b33768",
+    "det_check.npy": "637121cae8bc2ee45fe85a456e650021fb6573578fadf63064c69dc2c9c863a8",
+    "det_round.npy": "409bc7a504cf3bca22951a4195f643d815cca8ba17b395f70830db005e42f199",
+    "det_type.npy": "dcb388b950a36fcd4e0fa09ad9bd5cb029773afd3a9a993aeb7d831f2bde7d6c",
+    "priors.npy": "c4554f011a2be8555a85bab922c8d495e86fea2228afcd90be96bbdd7a83cb8d"
+  }
+}

@@ -13,6 +13,9 @@ dependencies = [
 rtd-sample = "rtd.sample:main"
 rtd-export = "rtd.export:main"
 rtd-golden = "rtd.golden:main"
+rtd-xz-split = "rtd.xz:main"
+rtd-xz-split-shots = "rtd.xz:main_shots"
+rtd-campaign = "rtd.campaign:main"
 
 [dependency-groups]
 dev = [
@@ -22,6 +25,15 @@ dev = [
 # commit the C++ decoder is checked against. Builds a Rust extension on install.
 reference = [
     "relay-bp[stim] @ git+https://github.com/trmue/relay@d185194ba0cb4101ced4340d82b2ee6d42f225f0",
+]
+# nanobind builds the extension module rtd._native (the RelayDecoder / WindowedDecoder classes);
+# CMake finds it through the venv's interpreter when configured with -DRTD_ENABLE_PYTHON=ON.
+bindings = [
+    "nanobind>=3.1",
+]
+# sinter runs Monte Carlo collections with rtd.sinter_decoders().
+sinter = [
+    "sinter>=1.15",
 ]
 
 [build-system]

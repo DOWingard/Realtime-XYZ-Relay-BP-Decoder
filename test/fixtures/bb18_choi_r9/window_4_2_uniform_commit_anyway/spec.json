@@ -1,0 +1,37 @@
+{
+  "version": 2,
+  "policy": "f32",
+  "backend": "cpu",
+  "layout": "row_major",
+  "column_order": "wavefront",
+  "block_rows": 64,
+  "executor": {
+    "type": "serial"
+  },
+  "alpha": {
+    "rule": "constant",
+    "value": 1.0
+  },
+  "gamma0": 0.125,
+  "pre_iter": 80,
+  "set_max_iter": 60,
+  "num_sets": 50,
+  "stopping": {
+    "rule": "after_n_converged",
+    "count": 3
+  },
+  "gamma_source": {
+    "type": "explicit_shapes",
+    "directory": "gammas"
+  },
+  "window": {
+    "mode": "sliding",
+    "width": 4,
+    "commit": 2,
+    "converge_rounds": 4,
+    "boundary": "uniform",
+    "on_failure": "commit_anyway",
+    "max_deferrals": 0,
+    "iteration_cap": null
+  }
+}

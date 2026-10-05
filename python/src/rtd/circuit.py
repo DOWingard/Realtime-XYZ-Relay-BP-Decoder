@@ -26,6 +26,13 @@ Idle noise is charged to every data/check qubit left untouched during a
 time step, except in the first step of the noisy region and in the final
 step, where the data qubits are consumed by the noiseless readout.
 
+Detector order: every noisy round lists its Z-check detectors (measured at t6), then its X-check
+detectors (t7), each by check index. The Choi experiment's final layer lists X, then Z, unless
+readout_in_round_order=True, which lists it like the noisy rounds. The two orders give the same
+detector error model up to that relabeling of the final layer's detectors. A window decoder that
+reuses one window shape at every position (the uniform boundary) reads each round's syndrome by
+position within the round, so it needs every round, the final layer included, in the same order.
+
 relay_bp_compat=True reproduces one quirk of the reference circuits shipped
 with IBM's relay_bp: in the last cycle, the idle noise of the right data block
 (idle at t6) and of the Z checks (idle at t7) is applied before t5 instead.
@@ -158,11 +165,15 @@ def build_memory_circuit(
     experiment: Experiment,
     noise: NoiseModel,
     relay_bp_compat: bool = False,
+    readout_in_round_order: bool = False,
 ) -> MemoryCircuit:
     if rounds < 1:
         raise ValueError(f"rounds must be >= 1, got {rounds}")
     if experiment not in EXPERIMENTS:
         raise ValueError(f"unknown experiment {experiment!r}; expected one of {EXPERIMENTS}")
+    if readout_in_round_order and experiment != "choi":
+        raise ValueError(f"readout_in_round_order applies to the choi experiment only (its final layer holds both "
+                         f"detector types), got {experiment!r}")
 
     h, n, k = code.half, code.n, code.k
     data = list(range(n))
@@ -249,10 +260,10 @@ def build_memory_circuit(
     else:
         final_x = b.measure_pauli_products([_pauli_product("X", s) for s in x_support])
         final_z = b.measure_pauli_products([_pauli_product("Z", s) for s in z_support])
-        for i in range(h):
-            b.detector([final_x[i], prev_x[i]], i, final_round, DETECTOR_X)
-        for i in range(h):
-            b.detector([final_z[i], prev_z[i]], i, final_round, DETECTOR_Z)
+        x_layer = [([final_x[i], prev_x[i]], i, DETECTOR_X) for i in range(h)]
+        z_layer = [([final_z[i], prev_z[i]], i, DETECTOR_Z) for i in range(h)]
+        for records, check, kind in (z_layer + x_layer if readout_in_round_order else x_layer + z_layer):
+            b.detector(records, check, final_round, kind)
         bell_z = b.measure_pauli_products(
             [_pauli_product("Z", np.flatnonzero(code.lz[j])) + [stim.target_z(refs[j])] for j in range(k)]
         )

@@ -1,0 +1,295 @@
+{
+  "format_version": 1,
+  "created": "2026-09-29T07:58:05.042372+00:00",
+  "artifact": {
+    "path": "test/fixtures/bb18_choi_r9/artifact",
+    "manifest_sha256": "a821afa5f5252bb96412bcf39b82ce7535fcf7c557978faa9c459494aa8add80"
+  },
+  "shots": {
+    "path": "test/fixtures/bb18_choi_r9/shots",
+    "first": 0,
+    "count": 100,
+    "detectors_sha256": "70338c97a24d300aa91ae055dad56b0212f16eedc17b55965cdd4de40d124902",
+    "observables_sha256": "14eacef9d00863db835a52c63d72acbc0dd9c54d12630cf08c81dbc6a1baa323"
+  },
+  "first": 0,
+  "count": 100,
+  "rounds": 9,
+  "window": {
+    "mode": "sliding",
+    "width": 4,
+    "commit": 2,
+    "converge_rounds": 4,
+    "boundary": "exact",
+    "on_failure": "defer",
+    "max_deferrals": 2,
+    "iteration_cap": null
+  },
+  "decoder": {
+    "float": "f32",
+    "gamma0": 0.125,
+    "pre_iter": 80,
+    "set_max_iter": 60,
+    "num_sets": 50,
+    "stopping": {
+      "rule": "after_n_converged",
+      "count": 3
+    },
+    "alpha": {
+      "rule": "constant",
+      "value": 1.0
+    },
+    "inner": "relay_bp, one freshly constructed decoder per window decode"
+  },
+  "gamma": {
+    "rows": 3,
+    "seed": 17,
+    "low": -0.24,
+    "high": 0.66
+  },
+  "config": {
+    "check_matrix": "window shape H as scipy.sparse.csr_matrix, uint8",
+    "error_priors": "window shape priors",
+    "alpha": null,
+    "alpha_iteration_scaling_factor": 1.0,
+    "gamma0": 0.125,
+    "data_scale_value": null,
+    "max_data_value": null,
+    "pre_iter": 80,
+    "num_sets": 50,
+    "set_max_iter": 60,
+    "gamma_dist_interval": [
+      -0.24,
+      0.66
+    ],
+    "explicit_gammas": "gammas/shape_<i>.npy",
+    "stop_nconv": 3,
+    "stopping_criterion": "nconv",
+    "logging": true,
+    "seed": 0,
+    "gamma_table": {
+      "rows": 3,
+      "seed": 17,
+      "interval": [
+        -0.24,
+        0.66
+      ],
+      "generator": "numpy.random.default_rng([seed, shape]).uniform(interval[0], interval[1], size=(rows, shape_columns))",
+      "leg_row": "relay leg r >= 1 uses row r mod rows"
+    }
+  },
+  "num_shapes": 8,
+  "num_positions": 4,
+  "plan": {
+    "spec": {
+      "width": 4,
+      "commit": 2,
+      "converge_rounds": 4,
+      "boundary": "exact",
+      "on_failure": "defer",
+      "max_deferrals": 2
+    },
+    "rounds_total": 10,
+    "detectors_per_round": 18,
+    "num_positions": 4,
+    "shapes": [
+      {
+        "index": 0,
+        "rows": 72,
+        "columns": 2637,
+        "edges": 13662,
+        "merged_columns": 81
+      },
+      {
+        "index": 1,
+        "rows": 108,
+        "columns": 4113,
+        "edges": 21726,
+        "merged_columns": 81
+      },
+      {
+        "index": 2,
+        "rows": 144,
+        "columns": 5589,
+        "edges": 29790,
+        "merged_columns": 81
+      },
+      {
+        "index": 3,
+        "rows": 72,
+        "columns": 2664,
+        "edges": 13815,
+        "merged_columns": 81
+      },
+      {
+        "index": 4,
+        "rows": 108,
+        "columns": 4140,
+        "edges": 21879,
+        "merged_columns": 81
+      },
+      {
+        "index": 5,
+        "rows": 144,
+        "columns": 5247,
+        "edges": 28593,
+        "merged_columns": 0
+      },
+      {
+        "index": 6,
+        "rows": 108,
+        "columns": 3771,
+        "edges": 20529,
+        "merged_columns": 0
+      },
+      {
+        "index": 7,
+        "rows": 72,
+        "columns": 2295,
+        "edges": 12465,
+        "merged_columns": 0
+      }
+    ],
+    "placements": [
+      {
+        "window": 0,
+        "attempt": 0,
+        "shape": 0,
+        "first_round": 1,
+        "rounds": 4,
+        "commit_rounds": 2,
+        "final": false
+      },
+      {
+        "window": 0,
+        "attempt": 1,
+        "shape": 1,
+        "first_round": 1,
+        "rounds": 6,
+        "commit_rounds": 2,
+        "final": false
+      },
+      {
+        "window": 0,
+        "attempt": 2,
+        "shape": 2,
+        "first_round": 1,
+        "rounds": 8,
+        "commit_rounds": 2,
+        "final": false
+      },
+      {
+        "window": 1,
+        "attempt": 0,
+        "shape": 3,
+        "first_round": 3,
+        "rounds": 4,
+        "commit_rounds": 2,
+        "final": false
+      },
+      {
+        "window": 1,
+        "attempt": 1,
+        "shape": 4,
+        "first_round": 3,
+        "rounds": 6,
+        "commit_rounds": 2,
+        "final": false
+      },
+      {
+        "window": 1,
+        "attempt": 2,
+        "shape": 5,
+        "first_round": 3,
+        "rounds": 8,
+        "commit_rounds": 8,
+        "final": true
+      },
+      {
+        "window": 2,
+        "attempt": 0,
+        "shape": 3,
+        "first_round": 5,
+        "rounds": 4,
+        "commit_rounds": 2,
+        "final": false
+      },
+      {
+        "window": 2,
+        "attempt": 1,
+        "shape": 6,
+        "first_round": 5,
+        "rounds": 6,
+        "commit_rounds": 6,
+        "final": true
+      },
+      {
+        "window": 3,
+        "attempt": 0,
+        "shape": 7,
+        "first_round": 7,
+        "rounds": 4,
+        "commit_rounds": 4,
+        "final": true
+      }
+    ]
+  },
+  "weights": "math.log((1 - p) / p) per local column, summed in ascending local index",
+  "skipped_windows": "after a final placement is committed the remaining positions are not decoded; their records are those of an empty window (attempts 0, converged 1, all counts 0)",
+  "shots_dir_compat": "sha256['circuit.stim'] is the artifact's source-circuit checksum (the circuit is not copied), so this directory is accepted as rtd_decode --shots",
+  "relay_bp": {
+    "version": "0.2.2",
+    "commit": "d185194ba0cb4101ced4340d82b2ee6d42f225f0"
+  },
+  "versions": {
+    "numpy": "2.5.3",
+    "scipy": "1.18.1",
+    "rtd": "0.1.0"
+  },
+  "timing": {
+    "decode_seconds": 26.968957865999982,
+    "total_seconds": 27.56454154899984,
+    "workers": 2
+  },
+  "summary": {
+    "shots": 100,
+    "windows_decoded": 396,
+    "windows_not_converged": 3,
+    "windows_deferred": 10,
+    "windows_skipped_after_final": 4,
+    "shots_all_windows_converged": 98,
+    "flagged_shots": 2,
+    "logical_failures": 87,
+    "virtual_commits": 0,
+    "mean_iterations_per_shot": 2780.32,
+    "max_window_iterations": 9240
+  },
+  "sha256": {
+    "circuit.stim": "1be222a3042d01517fae5e417c43e087a438c26137e9f3752a940e9b29956f2f",
+    "commit_faults.npy": "f905c2664131fc3f70866f47629bda8789ba0c3a045af089b37802890425ee41",
+    "commit_ptr.npy": "8c29ca8f68e97262d56b4227e4cfbf52a13cee8b1734e8b3f4c8b0bdb8e4601f",
+    "detectors.npy": "70338c97a24d300aa91ae055dad56b0212f16eedc17b55965cdd4de40d124902",
+    "flagged.npy": "ec267d8556b52bdbae5c68cef951eb77085d0b3d6f8226427d04c443d6e0386f",
+    "gammas/shape_0.npy": "779a9141f9db55a697499d89d3a3f10a69d904f781b25558d343550704511029",
+    "gammas/shape_1.npy": "48b914ceeeeabebf9d736fd897ea05b3912cb29f70d6db3440afc287988afd26",
+    "gammas/shape_2.npy": "d37e8414e8f54d26273397f8cb9453055ed0f255c91b21de47f381a6d4c3b163",
+    "gammas/shape_3.npy": "889c7318308b18d969489186661bd5ad43ea69e5337d56b4846e40a53bfb610e",
+    "gammas/shape_4.npy": "6cd039c6d811b4c38a0e41a52697abe9df69d33a4b03eb338ea8ada628941145",
+    "gammas/shape_5.npy": "fffd96acd3b93bf8853f1dc4d79db26d88f075fa8329453e1d0c951e2dcc8673",
+    "gammas/shape_6.npy": "c0dbf9143b2bfdb1865cb609e54fb095c9f6a844b06343ff6bff781082b50872",
+    "gammas/shape_7.npy": "254ce320a610f80cfdc499beff601c433d90a06f186efed31c6c1611be8f29a2",
+    "logical_failure.npy": "272095edddbeb94c3c672eb1da56367a5642ac966cc9e064554b94544a65e68e",
+    "observables.npy": "14eacef9d00863db835a52c63d72acbc0dd9c54d12630cf08c81dbc6a1baa323",
+    "predicted_observables.npy": "0b6ab6b6f3597a0e55b1589e3f778f53beeca3c071b2b6332edafa2fb906d82c",
+    "spec.json": "7ac6e8e88bc582b3eb40c3584dcd30ffbd7f1e9e5ef6f2576f36f917963bc372",
+    "win_attempts.npy": "5d23d415cf7d5696c9038f73657e18b7ed2d8c77d9973f88e2043f928b1e9ce6",
+    "win_committed_weight.npy": "d6b4d3cd031edca29f919b0891ca25b07749ed34b9e5e937ea0a103a78c6ead5",
+    "win_converged.npy": "7b90875205ee9380f0128da408b6afa06866ba4ebb8cee4e850866c7fc8b1f1f",
+    "win_flagged.npy": "ce97cd0940e2c2269d1bfff9b9bd68a51b777098d17c55f30d55eacaa670547f",
+    "win_iterations.npy": "bfb1147013159f826ab9c84d1f5f82fc26fa71cc37b8137132ac656878a2fabd",
+    "win_legs.npy": "92f39addc68d5206e1884b11964cc5308243b82dd8f7acd2312bf0d6edaf7681",
+    "win_unexplained.npy": "9a6e31e129a4ac125f3dc5b2205a3790565561c72700a1739fba6eb53618c4bd",
+    "win_virtual.npy": "aef79e3c8ae1bc6a9a69971b5d592265f94a3502a5116afc272f3ebf611b067b",
+    "win_weight.npy": "d5c72c42c87295da504cd808be45ecd753e61245ba966a64585f04caf431997f"
+  }
+}

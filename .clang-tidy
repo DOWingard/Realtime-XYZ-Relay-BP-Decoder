@@ -1,12 +1,47 @@
+# Static analysis for first-party code. The families below are all enabled; the exclusions are
+# checks whose premise does not hold for this codebase, each with the reason.
 Checks: >
   -*,
-  cppcoreguidelines-*,
   bugprone-*,
+  cppcoreguidelines-*,
   modernize-*,
   performance-*,
   readability-*,
+  concurrency-*,
   -modernize-use-trailing-return-type,
-  -readability-identifier-length
+  -readability-identifier-length,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  -cppcoreguidelines-pro-bounds-constant-array-index,
+  -cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -readability-magic-numbers,
+  -bugprone-easily-swappable-parameters,
+  -readability-math-missing-parentheses,
+  -cppcoreguidelines-avoid-do-while,
+  -concurrency-mt-unsafe
+# Why each exclusion:
+# - pro-bounds-pointer-arithmetic, pro-bounds-constant-array-index,
+#   pro-bounds-avoid-unchecked-container-access: the kernels walk flat structure-of-arrays
+#   buffers through raw pointers and operator[] at offsets validated once at graph construction;
+#   per-access bounds checks or span slicing in the inner loops cost vectorisation and would not
+#   add safety beyond what the construction-time validation and the sanitizer builds already give.
+# - avoid-magic-numbers, readability-magic-numbers: the literals are mathematical constants
+#   (bit widths, quantiles, the normal quantile of a 95% interval) explained where they are used,
+#   and test inputs; naming each would obscure the formulas.
+# - easily-swappable-parameters: kernels take several same-typed buffer pointers by design; the
+#   call sites name them and the golden tests would catch any swap bit for bit.
+# - math-missing-parentheses: flags ordinary a * b + c.
+# - avoid-do-while: gtest and nlohmann macros expand to it.
+# - mt-unsafe: flags getenv/strerror-style calls made only at startup, before threads exist.
 WarningsAsErrors: ''
-HeaderFilterRegex: '.*/include/.*'
+HeaderFilterRegex: '.*/(include|src/harness/include)/rtd/.*'
 FormatStyle: file
+CheckOptions:
+  - key: readability-function-cognitive-complexity.Threshold
+    value: '40'
+  - key: readability-function-cognitive-complexity.IgnoreMacros
+    value: 'true'
+  - key: cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor
+    value: 'true'
+  - key: readability-implicit-bool-conversion.AllowPointerConditions
+    value: 'true'

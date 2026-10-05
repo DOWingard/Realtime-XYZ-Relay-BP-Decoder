@@ -1,0 +1,184 @@
+{
+  "format_version": 1,
+  "created": "2026-09-29T07:56:30.107355+00:00",
+  "artifact": {
+    "path": "test/fixtures/bb18_choi/artifact",
+    "manifest_sha256": "f49c75931d541c81b9b96e322de7ce0d1fb71b3e7914760b5b3a060980ee8a9c"
+  },
+  "shots": {
+    "path": "bb18_shots",
+    "first": 0,
+    "count": 100,
+    "detectors_sha256": "da0c0d771eedb518d68de5a3979bcf9953a9bc69bc218a32934d5e92d5f5a0e8",
+    "observables_sha256": "95b72262c86fa21c052b319534d69ca07fd4cbd21ea20d1115a3617f7e960a49"
+  },
+  "first": 0,
+  "count": 100,
+  "rounds": 3,
+  "window": {
+    "mode": "sliding",
+    "width": 3,
+    "commit": 2,
+    "converge_rounds": 3,
+    "boundary": "exact",
+    "on_failure": "commit_anyway",
+    "max_deferrals": 0,
+    "iteration_cap": null
+  },
+  "decoder": {
+    "float": "f32",
+    "gamma0": 0.125,
+    "pre_iter": 80,
+    "set_max_iter": 60,
+    "num_sets": 50,
+    "stopping": {
+      "rule": "after_n_converged",
+      "count": 3
+    },
+    "alpha": {
+      "rule": "constant",
+      "value": 1.0
+    },
+    "inner": "relay_bp, one freshly constructed decoder per window decode"
+  },
+  "gamma": {
+    "rows": 3,
+    "seed": 17,
+    "low": -0.24,
+    "high": 0.66
+  },
+  "config": {
+    "check_matrix": "window shape H as scipy.sparse.csr_matrix, uint8",
+    "error_priors": "window shape priors",
+    "alpha": null,
+    "alpha_iteration_scaling_factor": 1.0,
+    "gamma0": 0.125,
+    "data_scale_value": null,
+    "max_data_value": null,
+    "pre_iter": 80,
+    "num_sets": 50,
+    "set_max_iter": 60,
+    "gamma_dist_interval": [
+      -0.24,
+      0.66
+    ],
+    "explicit_gammas": "gammas/shape_<i>.npy",
+    "stop_nconv": 3,
+    "stopping_criterion": "nconv",
+    "logging": true,
+    "seed": 0,
+    "gamma_table": {
+      "rows": 3,
+      "seed": 17,
+      "interval": [
+        -0.24,
+        0.66
+      ],
+      "generator": "numpy.random.default_rng([seed, shape]).uniform(interval[0], interval[1], size=(rows, shape_columns))",
+      "leg_row": "relay leg r >= 1 uses row r mod rows"
+    }
+  },
+  "num_shapes": 2,
+  "num_positions": 2,
+  "plan": {
+    "spec": {
+      "width": 3,
+      "commit": 2,
+      "converge_rounds": 3,
+      "boundary": "exact",
+      "on_failure": "commit_anyway",
+      "max_deferrals": 0
+    },
+    "rounds_total": 4,
+    "detectors_per_round": 18,
+    "num_positions": 2,
+    "shapes": [
+      {
+        "index": 0,
+        "rows": 54,
+        "columns": 1899,
+        "edges": 9630,
+        "merged_columns": 81
+      },
+      {
+        "index": 1,
+        "rows": 36,
+        "columns": 819,
+        "edges": 4401,
+        "merged_columns": 0
+      }
+    ],
+    "placements": [
+      {
+        "window": 0,
+        "attempt": 0,
+        "shape": 0,
+        "first_round": 1,
+        "rounds": 3,
+        "commit_rounds": 2,
+        "final": false
+      },
+      {
+        "window": 1,
+        "attempt": 0,
+        "shape": 1,
+        "first_round": 3,
+        "rounds": 2,
+        "commit_rounds": 2,
+        "final": true
+      }
+    ]
+  },
+  "weights": "math.log((1 - p) / p) per local column, summed in ascending local index",
+  "skipped_windows": "after a final placement is committed the remaining positions are not decoded; their records are those of an empty window (attempts 0, converged 1, all counts 0)",
+  "shots_dir_compat": "sha256['circuit.stim'] is the artifact's source-circuit checksum (the circuit is not copied), so this directory is accepted as rtd_decode --shots",
+  "relay_bp": {
+    "version": "0.2.2",
+    "commit": "d185194ba0cb4101ced4340d82b2ee6d42f225f0"
+  },
+  "versions": {
+    "numpy": "2.5.3",
+    "scipy": "1.18.1",
+    "rtd": "0.1.0"
+  },
+  "timing": {
+    "decode_seconds": 3.628860309000629,
+    "total_seconds": 3.7324279939994085,
+    "workers": 2
+  },
+  "summary": {
+    "shots": 100,
+    "windows_decoded": 200,
+    "windows_not_converged": 0,
+    "windows_deferred": 0,
+    "windows_skipped_after_final": 0,
+    "shots_all_windows_converged": 100,
+    "flagged_shots": 0,
+    "logical_failures": 40,
+    "virtual_commits": 0,
+    "mean_iterations_per_shot": 395.96,
+    "max_window_iterations": 3069
+  },
+  "sha256": {
+    "circuit.stim": "caaa894ebe3d76f60ff04102b53dda3e329716b965fbe553640f2f392284600b",
+    "commit_faults.npy": "f5302cd570472f023912b0d10a212a2723c3749b43273fbca42cadb5fb9f33e9",
+    "commit_ptr.npy": "6c120a914b1d722f5721c80f92e984825450ad9d476a35d9404f8e671396a122",
+    "detectors.npy": "c3e0fc1afb9c62fd08621b9e9d9067e933de22e34d43724268a2aac0c39ebe2b",
+    "flagged.npy": "e045be5525402f8545d5f7024cdb828abedd7bd500cfa5ac6bca4e280aaaf5c5",
+    "gammas/shape_0.npy": "758796c2b5cff2fd91e544bf1ed7a7238f86e844fb931458c792daa41d836b73",
+    "gammas/shape_1.npy": "866f8a272c644cf5c5c2038acd1d51f610a00daae29f29f4e173572d7fa98dff",
+    "logical_failure.npy": "a702469624e908cabec1d81bac0a4305877445f7e59304f5ddd86f0ba7d8ee4f",
+    "observables.npy": "c1e2e71aaacb85f9b134196c3701e3283d1b411b83d1598c198a8eb29005eeac",
+    "predicted_observables.npy": "3f94c63596e42f7513abbb540d808fe37c4bda8ad5b09a3de5124dae5ecf3054",
+    "spec.json": "e83753d96ca75b25a791781a1dc4c6d168aabf41385e305b5c49ccc20d5c5160",
+    "win_attempts.npy": "af37e5a7448f6083f06fe47e13a8ddb8362714620006bae44241a9b3986b9087",
+    "win_committed_weight.npy": "559cbc76f9cfed313a33f7170ce02a373285238a6e9a0a30bb08be2eb3622fbb",
+    "win_converged.npy": "af37e5a7448f6083f06fe47e13a8ddb8362714620006bae44241a9b3986b9087",
+    "win_flagged.npy": "0598d812d1de0d7278a398f5c6bd3d33e3c0bf0127b14a772c68de6e9c677b78",
+    "win_iterations.npy": "c7c1239c3e5ec68a1e091c4fbf8e30800e4443ee234bfb479d5ebb1d72497d3a",
+    "win_legs.npy": "55810c1975e377dd8f1972ee15c7141edfe3571e7fd96a56ecb4186a1a462f6a",
+    "win_unexplained.npy": "45d49813d95b9bd541f557fbecb99818cb76225d57afe3b42af25d08b7da8ef7",
+    "win_virtual.npy": "45d49813d95b9bd541f557fbecb99818cb76225d57afe3b42af25d08b7da8ef7",
+    "win_weight.npy": "e16868be1874884e43e33104ccf5e8251d64168faf2c360ef7083791dc63f31e"
+  }
+}

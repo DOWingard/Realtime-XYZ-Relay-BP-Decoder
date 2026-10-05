@@ -1,0 +1,55 @@
+{
+  "description": "Hand-derived windowed decoding of the 3-bit repetition code in this directory (derivation: DERIVATION.md). Rows: detector (r, c) is row 2 (r - 1) + c. Columns: 5 (r - 1) + {0: q1 flip, 1: c0 misread, 2: q0 flip (flips observable 0), 3: q2 flip, 4: c1 misread}. syndrome = one bit per row. residual_first_round_before_decode = the residual syndrome of the window's first round just before it is decoded (sigma XOR carry); carry = (H c) on that round from the columns committed so far. solution = the window's unique minimum-weight correction, as representative global columns (a merged column is named by its smallest member). committed = global columns committed by the window, ascending. frame_after = the logical frame after the window's commits, bit o = observable o. Inner decoder: exact minimum weight; converge rounds = width; boundary exact; on_failure commit_anyway.",
+  "p_data": 0.01,
+  "p_meas": 0.02,
+  "rounds_total": 7,
+  "detectors_per_round": 2,
+  "cases": [
+    {
+      "name": "A_w3_c1_straddle_and_merged_buffer",
+      "width": 3,
+      "commit": 1,
+      "injected_faults": [6, 15, 27],
+      "syndrome": [0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0],
+      "true_observables": 1,
+      "windows": [
+        {"window": 0, "first_round": 1, "residual_first_round_before_decode": [0, 0], "carry": [0, 0], "solution": [6], "committed": [], "frame_after": 0},
+        {"window": 1, "first_round": 2, "residual_first_round_before_decode": [1, 0], "carry": [0, 0], "solution": [6, 15], "committed": [6], "frame_after": 0},
+        {"window": 2, "first_round": 3, "residual_first_round_before_decode": [0, 0], "carry": [1, 0], "solution": [15], "committed": [], "frame_after": 0},
+        {"window": 3, "first_round": 4, "residual_first_round_before_decode": [1, 1], "carry": [0, 0], "solution": [15, 26], "committed": [15], "frame_after": 0},
+        {"window": 4, "first_round": 5, "residual_first_round_before_decode": [0, 0], "carry": [0, 0], "solution": [27], "committed": [27], "frame_after": 1}
+      ],
+      "final_frame": 1
+    },
+    {
+      "name": "B_w4_c2_straddle_and_observable",
+      "width": 4,
+      "commit": 2,
+      "injected_faults": [9, 17, 29],
+      "syndrome": [0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1],
+      "true_observables": 1,
+      "windows": [
+        {"window": 0, "first_round": 1, "residual_first_round_before_decode": [0, 0], "carry": [0, 0], "solution": [9, 16], "committed": [9], "frame_after": 0},
+        {"window": 1, "first_round": 3, "residual_first_round_before_decode": [0, 0], "carry": [0, 1], "solution": [17, 28], "committed": [17], "frame_after": 1},
+        {"window": 2, "first_round": 5, "residual_first_round_before_decode": [0, 0], "carry": [0, 0], "solution": [29], "committed": [29], "frame_after": 1}
+      ],
+      "final_frame": 1
+    },
+    {
+      "name": "C_w3_c1_carry_creates_detector",
+      "width": 3,
+      "commit": 1,
+      "injected_faults": [4, 9],
+      "syndrome": [0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+      "true_observables": 0,
+      "windows": [
+        {"window": 0, "first_round": 1, "residual_first_round_before_decode": [0, 1], "carry": [0, 0], "solution": [4, 9], "committed": [4], "frame_after": 0},
+        {"window": 1, "first_round": 2, "residual_first_round_before_decode": [0, 1], "carry": [0, 1], "solution": [9], "committed": [9], "frame_after": 0},
+        {"window": 2, "first_round": 3, "residual_first_round_before_decode": [0, 0], "carry": [0, 1], "solution": [], "committed": [], "frame_after": 0},
+        {"window": 3, "first_round": 4, "residual_first_round_before_decode": [0, 0], "carry": [0, 0], "solution": [], "committed": [], "frame_after": 0},
+        {"window": 4, "first_round": 5, "residual_first_round_before_decode": [0, 0], "carry": [0, 0], "solution": [], "committed": [], "frame_after": 0}
+      ],
+      "final_frame": 0
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "format_version": 1,
+  "created": "2026-09-30T04:43:25.415541+00:00",
+  "golden": "fixed_int4_4_2_exact_commit_anyway",
+  "arithmetic": "int4.2.8",
+  "format": {
+    "magnitude_bits": 4,
+    "llr_scale": 2,
+    "memory_scale": 8
+  },
+  "decoder": {
+    "arithmetic": "int4.2.8",
+    "gamma0": 0.125,
+    "pre_iter": 30,
+    "set_max_iter": 20,
+    "num_sets": 12,
+    "stopping": {
+      "rule": "after_n_converged",
+      "count": 3
+    },
+    "alpha": {
+      "rule": "adaptive",
+      "scaling": 1.0
+    },
+    "inner": "rtd.fixed_ref integer emulator"
+  },
+  "fixed_point_choices": {
+    "rounding": "round half away from zero, for S*lambda and for (1 - gamma)*M",
+    "saturation": "bias and stored marginal clip to +-(2^N - 1); nu clips to the same range",
+    "hard_decision": "e_j = 1 when the unsaturated sigma_j <= 0",
+    "accumulator": "exact (no overflow): sigma and every partial sum",
+    "alpha": "alpha*x = x - (x >> k); adaptive: k = t + 1, t = iteration index within the leg",
+    "memory_strength": "beta_int = round((1 - gamma) M) clipped to [0, 2M]; gamma*x = x - beta(x)x",
+    "multiplier": "beta(x)x = sign(x) sum_{bit b of |x|} floor(beta_int 2^b / M)",
+    "first_iteration": "the first check pass of every leg reads lambda_int (messages restart from the priors)",
+    "marginal_init": "M = lambda_int at the start of a decode; kept from leg to leg",
+    "weight": "sum of lambda_int over the support, divided by S once"
+  },
+  "window": {
+    "mode": "sliding",
+    "width": 4,
+    "commit": 2,
+    "converge_rounds": 4,
+    "boundary": "exact",
+    "on_failure": "commit_anyway",
+    "max_deferrals": 0,
+    "iteration_cap": null
+  },
+  "rounds_total": 10,
+  "detectors_per_round": 18,
+  "num_positions": 4,
+  "num_shapes": 3,
+  "shots": 100,
+  "first_shot": 0,
+  "observables": 8,
+  "gamma_rows": 3,
+  "arrays": {
+    "detectors": "uint8 [S, Rt*M]: the detector stream of each shot, round after round (row (r - 1)*M + i is check i of round r)",
+    "observables": "uint8 [S, k]: the true logical observable flips",
+    "shape_rows, shape_columns": "uint32 [num_shapes]: local window size of each shape",
+    "shape<i>_H_indptr, shape<i>_H_indices": "uint32: the window check matrix H~ of shape i (local CSR, rows in round order)",
+    "shape<i>_lambda": "int8 [n_i]: quantised priors lambda_int = sat(round(S ln((1 - p)/p)))",
+    "shape<i>_commit": "uint8 [n_i]: commit mask m_com (1 = the column is decided by this window)",
+    "shape<i>_converge": "uint8 [rows_i]: convergence mask (1 = H~ e = s must hold on this row)",
+    "shape<i>_frame": "uint64 [n_i]: frame matrix A~ by column: bit o = logical observable o flipped (0 for uncommitted columns)",
+    "shape<i>_beta": "uint8 [T, n_i]: beta_int = round((1 - gamma) M) of relay leg r >= 1 (row r mod T); leg 0 uses beta(gamma0)",
+    "placement_window, placement_attempt, placement_shape, placement_first_round, placement_final": "uint32/uint8 [P]: the plan",
+    "placement<k>_<a>_columns": "uint32 [n]: global column of each local column (0xFFFFFFFF = virtual, uniform boundary)",
+    "win_attempts": "uint8 [S, K]: attempts decoded at window position k (0 = skipped after a final placement)",
+    "win_iterations, win_legs": "uint32 [S, K]: BP iterations and relay legs, summed over the attempts",
+    "win_converged, win_cap_hit, win_flagged": "uint8 [S, K]: outcome of the committed attempt",
+    "win_carry": "uint8 [S, K, M]: the window's first-round detectors after the carry of earlier commits (Algorithm 2's d~[0:M] xor u)",
+    "win_frame": "uint64 [S, K]: accumulated logical frame after the window (bit o = observable o)",
+    "solution_ptr, solution_local": "uint64 [S K + 1], uint32: the local support of the returned e of each window (committed attempt)",
+    "commit_local_ptr, commit_local": "uint64 [S K + 1], uint32: local committed columns (e AND m_com) of each window",
+    "commit_ptr, commit_faults": "uint64 [S K + 1], uint32: committed global columns of each window (virtual ones omitted)",
+    "predicted_observables": "uint8 [S, k]: the final frame",
+    "logical_failure": "uint8 [S]: predicted_observables != observables anywhere"
+  },
+  "stream": "window k starts at round t_k = 1 + k C; its syndrome is the residual of rounds [t_k, t_k + rows/M) (rounds past Rt are zero); after decoding, e AND m_com is committed: its rows flip the residual and A~ e_com is XORed into the frame",
+  "reproduced": "every array was reproduced by a second, single-process decode before writing",
+  "sha256_npz": "44c3e5ed46e196809764a39f2ce89612a3fac8aff71d9516b8de49e529c5eaae"
+}

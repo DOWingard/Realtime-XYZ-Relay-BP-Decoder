@@ -1,0 +1,201 @@
+{
+  "format_version": 1,
+  "created": "2026-09-29T07:56:16.328928+00:00",
+  "artifact": {
+    "path": "test/fixtures/bb18_choi/artifact",
+    "manifest_sha256": "f49c75931d541c81b9b96e322de7ce0d1fb71b3e7914760b5b3a060980ee8a9c"
+  },
+  "shots": {
+    "path": "bb18_shots",
+    "first": 0,
+    "count": 100,
+    "detectors_sha256": "da0c0d771eedb518d68de5a3979bcf9953a9bc69bc218a32934d5e92d5f5a0e8",
+    "observables_sha256": "95b72262c86fa21c052b319534d69ca07fd4cbd21ea20d1115a3617f7e960a49"
+  },
+  "first": 0,
+  "count": 100,
+  "rounds": 3,
+  "window": {
+    "mode": "sliding",
+    "width": 2,
+    "commit": 1,
+    "converge_rounds": 2,
+    "boundary": "exact",
+    "on_failure": "commit_anyway",
+    "max_deferrals": 0,
+    "iteration_cap": null
+  },
+  "decoder": {
+    "float": "f32",
+    "gamma0": 0.125,
+    "pre_iter": 80,
+    "set_max_iter": 60,
+    "num_sets": 50,
+    "stopping": {
+      "rule": "after_n_converged",
+      "count": 3
+    },
+    "alpha": {
+      "rule": "constant",
+      "value": 1.0
+    },
+    "inner": "relay_bp, one freshly constructed decoder per window decode"
+  },
+  "gamma": {
+    "rows": 3,
+    "seed": 17,
+    "low": -0.24,
+    "high": 0.66
+  },
+  "config": {
+    "check_matrix": "window shape H as scipy.sparse.csr_matrix, uint8",
+    "error_priors": "window shape priors",
+    "alpha": null,
+    "alpha_iteration_scaling_factor": 1.0,
+    "gamma0": 0.125,
+    "data_scale_value": null,
+    "max_data_value": null,
+    "pre_iter": 80,
+    "num_sets": 50,
+    "set_max_iter": 60,
+    "gamma_dist_interval": [
+      -0.24,
+      0.66
+    ],
+    "explicit_gammas": "gammas/shape_<i>.npy",
+    "stop_nconv": 3,
+    "stopping_criterion": "nconv",
+    "logging": true,
+    "seed": 0,
+    "gamma_table": {
+      "rows": 3,
+      "seed": 17,
+      "interval": [
+        -0.24,
+        0.66
+      ],
+      "generator": "numpy.random.default_rng([seed, shape]).uniform(interval[0], interval[1], size=(rows, shape_columns))",
+      "leg_row": "relay leg r >= 1 uses row r mod rows"
+    }
+  },
+  "num_shapes": 3,
+  "num_positions": 3,
+  "plan": {
+    "spec": {
+      "width": 2,
+      "commit": 1,
+      "converge_rounds": 2,
+      "boundary": "exact",
+      "on_failure": "commit_anyway",
+      "max_deferrals": 0
+    },
+    "rounds_total": 4,
+    "detectors_per_round": 18,
+    "num_positions": 3,
+    "shapes": [
+      {
+        "index": 0,
+        "rows": 36,
+        "columns": 1161,
+        "edges": 5598,
+        "merged_columns": 81
+      },
+      {
+        "index": 1,
+        "rows": 36,
+        "columns": 1188,
+        "edges": 5751,
+        "merged_columns": 81
+      },
+      {
+        "index": 2,
+        "rows": 36,
+        "columns": 819,
+        "edges": 4401,
+        "merged_columns": 0
+      }
+    ],
+    "placements": [
+      {
+        "window": 0,
+        "attempt": 0,
+        "shape": 0,
+        "first_round": 1,
+        "rounds": 2,
+        "commit_rounds": 1,
+        "final": false
+      },
+      {
+        "window": 1,
+        "attempt": 0,
+        "shape": 1,
+        "first_round": 2,
+        "rounds": 2,
+        "commit_rounds": 1,
+        "final": false
+      },
+      {
+        "window": 2,
+        "attempt": 0,
+        "shape": 2,
+        "first_round": 3,
+        "rounds": 2,
+        "commit_rounds": 2,
+        "final": true
+      }
+    ]
+  },
+  "weights": "math.log((1 - p) / p) per local column, summed in ascending local index",
+  "skipped_windows": "after a final placement is committed the remaining positions are not decoded; their records are those of an empty window (attempts 0, converged 1, all counts 0)",
+  "shots_dir_compat": "sha256['circuit.stim'] is the artifact's source-circuit checksum (the circuit is not copied), so this directory is accepted as rtd_decode --shots",
+  "relay_bp": {
+    "version": "0.2.2",
+    "commit": "d185194ba0cb4101ced4340d82b2ee6d42f225f0"
+  },
+  "versions": {
+    "numpy": "2.5.3",
+    "scipy": "1.18.1",
+    "rtd": "0.1.0"
+  },
+  "timing": {
+    "decode_seconds": 4.606805927000096,
+    "total_seconds": 4.8192241509996165,
+    "workers": 2
+  },
+  "summary": {
+    "shots": 100,
+    "windows_decoded": 300,
+    "windows_not_converged": 2,
+    "windows_deferred": 0,
+    "windows_skipped_after_final": 0,
+    "shots_all_windows_converged": 99,
+    "flagged_shots": 0,
+    "logical_failures": 41,
+    "virtual_commits": 0,
+    "mean_iterations_per_shot": 408.65,
+    "max_window_iterations": 3080
+  },
+  "sha256": {
+    "circuit.stim": "caaa894ebe3d76f60ff04102b53dda3e329716b965fbe553640f2f392284600b",
+    "commit_faults.npy": "c4b858731a4e833c7063c2134323f5766b94a45679280eced1ea7246dd5cd73c",
+    "commit_ptr.npy": "2b5209193cd16f16c164104ae0e3a0c465e611fbd48593f317dabd539b64ee30",
+    "detectors.npy": "c3e0fc1afb9c62fd08621b9e9d9067e933de22e34d43724268a2aac0c39ebe2b",
+    "flagged.npy": "e045be5525402f8545d5f7024cdb828abedd7bd500cfa5ac6bca4e280aaaf5c5",
+    "gammas/shape_0.npy": "dee680ff3d169c7bb787dce96d9eb428fe6da7cf9dd637f1a4270493036ba531",
+    "gammas/shape_1.npy": "bb3e3b29e9913d7dfea48368f527fb6f55dde7aab6a69ed878dc4e1eea26b508",
+    "gammas/shape_2.npy": "37724a132fcdcf81bd28019221d8593ba14fa56b8edf2fc362ac71b93d6944d1",
+    "logical_failure.npy": "6132b5bec449280526ab99c335099a6efdfb0d0c3663a767eebc053e6fe33591",
+    "observables.npy": "c1e2e71aaacb85f9b134196c3701e3283d1b411b83d1598c198a8eb29005eeac",
+    "predicted_observables.npy": "9aa7dab5c0f394c25b67ce8a4e101cdc204972988f3bccd902423d3bb7cb3eef",
+    "spec.json": "ea463cecf1fcddd6e80d88273b159fd4eea82db7e0931d6b4f8d8fa7965337b1",
+    "win_attempts.npy": "cdb8e913b0fa003c4ee7e76da4143430eaacbee4a7bb6b6d6d6a5bd6dfcee6b2",
+    "win_committed_weight.npy": "6d8abef938d1817275d83687ed6a5c4e993809b9956b78fb015f82134356f4ac",
+    "win_converged.npy": "bf76beda7db50975bff0b8b217a0415924e4e387d21c64d9a19c5600537d2e14",
+    "win_flagged.npy": "cb389fceca7b8ae84437330b3a26162059490be4cf9cad26e5a953722dffdd4d",
+    "win_iterations.npy": "e60ffdda8b5e2df5c2b5270de55c74c193344c10203a1cf092e114d71f2816f7",
+    "win_legs.npy": "83d69fcfc09f42ad70a49e6445b1c2b2234982b3cf0a1ee992a80df20ecd95b6",
+    "win_unexplained.npy": "2001214bacb5fa16464ea991329b8619426709488b7ea8044ae1399ee6f4b42a",
+    "win_virtual.npy": "756dbfbcf69ec93a258c92b8213296b32ff3469bc7c9bbd9f1424cae5892bb92",
+    "win_weight.npy": "884eeddaf0212c436d32fac1cc0c2966251bfb401501c2ad21b3f385b105827b"
+  }
+}

@@ -1,13 +1,12 @@
 """Export the decoding problem (H, A, priors) of a circuit as an artifact for the C++ decoder.
 
-The matrices come from relay_bp's CheckMatrices.from_dem on the circuit's
-undecomposed detector error model, so the C++ decoder sees exactly the problem
-relay_bp decodes. from_dem is called with its default decomposed_hyperedges=None:
-that tries a decomposed (graphlike) conversion and falls back to the
-undecomposed one when the model has hyperedges. Passing False explicitly makes
-it return the decomposed matrices instead. Because of that silent fallback,
-the result is always checked against a direct parse of the error model:
-one column per error mechanism, in model order.
+The matrices come from rtd.dem's direct conversion of the circuit's undecomposed detector error
+model: one column per error mechanism, in model order, with decided (p = 0 or p = 1) mechanisms
+pruned by relay_bp's rule. When IBM's relay_bp is installed, its CheckMatrices.from_dem is run on
+the same model as a cross-check and must agree exactly (it is the conversion relay_bp decodes
+with). from_dem is called with its default decomposed_hyperedges=None: that tries a decomposed
+(graphlike) conversion and falls back to the undecomposed one when the model has hyperedges;
+the comparison would catch the decomposed branch.
 
 Artifact directory contents (rows = detectors, columns = error mechanisms):
     H_indptr.npy, H_indices.npy   uint32  CSR of H, column indices ascending within each row
@@ -29,13 +28,14 @@ import logging
 import sys
 import time
 from datetime import datetime, timezone
-from importlib.metadata import distribution, version
+from importlib.metadata import PackageNotFoundError, distribution, version
 from pathlib import Path
 
 import numpy as np
 import scipy.sparse as sp
 import stim
 
+from rtd import dem as dem_conversion
 from rtd import log
 
 logger = logging.getLogger("rtd.export")
@@ -53,43 +53,55 @@ def _sha256(path: Path) -> str:
 
 def parse_dem(dem: stim.DetectorErrorModel) -> tuple[sp.csc_matrix, sp.csc_matrix, np.ndarray]:
     """H, A and priors straight from the model: one column per error mechanism, in model order."""
-    det_rows, det_cols, obs_rows, obs_cols, priors = [], [], [], [], []
-    for inst in dem.flattened():
-        if inst.type != "error":
-            continue
-        j = len(priors)
-        for t in inst.targets_copy():
-            if t.is_relative_detector_id():
-                det_rows.append(t.val)
-                det_cols.append(j)
-            elif t.is_logical_observable_id():
-                obs_rows.append(t.val)
-                obs_cols.append(j)
-        priors.append(inst.args_copy()[0])
-    n = len(priors)
-    h = sp.csc_matrix(
-        (np.ones(len(det_rows), dtype=np.uint8), (det_rows, det_cols)), shape=(dem.num_detectors, n)
-    )
-    a = sp.csc_matrix(
-        (np.ones(len(obs_rows), dtype=np.uint8), (obs_rows, obs_cols)), shape=(dem.num_observables, n)
-    )
-    return h, a, np.array(priors, dtype=np.float64)
+    h, a, p, _ = dem_conversion.parse_dem(dem)
+    return h, a, p
 
 
 def _same_binary(x: sp.spmatrix, y: sp.spmatrix) -> bool:
     return x.shape == y.shape and (sp.csc_matrix(x, dtype=np.int16) != sp.csc_matrix(y, dtype=np.int16)).nnz == 0
 
 
-def _to_csr(m: sp.spmatrix) -> tuple[np.ndarray, np.ndarray]:
-    csr = sp.csr_matrix(m, dtype=np.uint8)
-    csr.eliminate_zeros()
-    csr.sum_duplicates()
-    csr.sort_indices()
-    if csr.nnz and not np.all(csr.data == 1):
-        raise ValueError("matrix has entries other than 0/1")
-    if csr.nnz >= 2**32 or max(csr.shape) >= 2**32:
-        raise ValueError(f"matrix too large for uint32 indices: shape {csr.shape}, nnz {csr.nnz}")
-    return csr.indptr.astype(np.uint32), csr.indices.astype(np.uint32)
+def _cross_check_relay_bp(dem: stim.DetectorErrorModel, problem: dem_conversion.DecodingProblem) -> bool:
+    """Compares the conversion with relay_bp's from_dem; False when relay_bp is not installed."""
+    try:
+        from relay_bp.stim.sinter.check_matrices import CheckMatrices
+    except ImportError:
+        logger.warning(
+            "relay_bp is not installed; the conversion is not cross-checked against its from_dem "
+            "(install the 'reference' dependency group to enable the check)"
+        )
+        return False
+    t0 = time.perf_counter()
+    raw = CheckMatrices.from_dem(dem, prune_decided_errors=False)
+    logger.info("from_dem finished", extra={"columns": raw.check_matrix.shape[1], "seconds": time.perf_counter() - t0})
+    h_direct, a_direct, p_direct = parse_dem(dem)
+    if not (
+        _same_binary(raw.check_matrix, h_direct)
+        and _same_binary(raw.observables_matrix, a_direct)
+        and np.array_equal(raw.error_priors, p_direct)
+    ):
+        raise RuntimeError(
+            "from_dem output is not the undecomposed model in model order "
+            f"(got H {raw.check_matrix.shape}, expected {h_direct.shape}); "
+            "it may have taken the decomposed (graphlike) branch"
+        )
+    cm = raw.prune_decided_errors(threshold=problem.prune_threshold)
+    ref_h = dem_conversion.to_csr(cm.check_matrix)
+    ref_a = dem_conversion.to_csr(cm.observables_matrix)
+    same = (
+        all(np.array_equal(x, y) for x, y in zip(ref_h, (problem.h_indptr, problem.h_indices), strict=True))
+        and all(np.array_equal(x, y) for x, y in zip(ref_a, (problem.a_indptr, problem.a_indices), strict=True))
+        and np.array_equal(np.asarray(cm.error_priors, dtype=np.float64), problem.priors)
+    )
+    for ours, theirs in ((problem.syndrome_bias, cm.syndrome_bias), (problem.observables_bias, cm.observables_bias)):
+        if (ours is None) != (theirs is None) or (
+            ours is not None and not np.array_equal(ours, np.asarray(theirs, dtype=np.uint8).reshape(-1))
+        ):
+            same = False
+    if not same:
+        raise RuntimeError("the pruned conversion differs from relay_bp's prune_decided_errors")
+    logger.info("conversion verified against relay_bp's from_dem and prune_decided_errors")
+    return True
 
 
 def _degree_stats(degrees: np.ndarray) -> dict[str, float]:
@@ -99,6 +111,13 @@ def _degree_stats(degrees: np.ndarray) -> dict[str, float]:
         "mean": float(degrees.mean()),
         "zero": int(np.sum(degrees == 0)),
     }
+
+
+def _optional_version(package: str) -> str | None:
+    try:
+        return version(package)
+    except PackageNotFoundError:
+        return None
 
 
 def _relay_bp_source() -> dict[str, str | None]:
@@ -111,8 +130,6 @@ def _relay_bp_source() -> dict[str, str | None]:
 
 
 def export_artifact(circuit_path: Path, out: Path, prune_threshold: float = 0.0) -> dict:
-    from relay_bp.stim.sinter.check_matrices import CheckMatrices
-
     circuit = stim.Circuit.from_file(circuit_path)
     circuit_sha = _sha256(circuit_path)
     logger.info(
@@ -129,48 +146,14 @@ def export_artifact(circuit_path: Path, out: Path, prune_threshold: float = 0.0)
     dem = circuit.detector_error_model(decompose_errors=False)
     logger.info("detector error model built", extra={"errors": dem.num_errors, "seconds": time.perf_counter() - t0})
 
-    t0 = time.perf_counter()
-    raw = CheckMatrices.from_dem(dem, prune_decided_errors=False)
-    logger.info("from_dem finished", extra={"columns": raw.check_matrix.shape[1], "seconds": time.perf_counter() - t0})
+    problem = dem_conversion.problem_from_dem(dem, prune_threshold=prune_threshold)
+    cross_checked = _cross_check_relay_bp(dem, problem)
 
-    h_direct, a_direct, p_direct = parse_dem(dem)
-    if not (
-        _same_binary(raw.check_matrix, h_direct)
-        and _same_binary(raw.observables_matrix, a_direct)
-        and np.array_equal(raw.error_priors, p_direct)
-    ):
-        raise RuntimeError(
-            "from_dem output is not the undecomposed model in model order "
-            f"(got H {raw.check_matrix.shape}, expected {h_direct.shape}); "
-            "it may have taken the decomposed (graphlike) branch"
-        )
-    logger.info("from_dem output verified against direct parse of the error model")
-
-    # Same selection rule as CheckMatrices.prune_decided_errors, so the column map is exact.
-    p_raw = raw.error_priors
-    decided = (p_raw <= 0.0 + prune_threshold) | (p_raw >= 1.0 - prune_threshold)
-    col_to_dem = np.flatnonzero(~decided).astype(np.int64)
-    cm = raw.prune_decided_errors(threshold=prune_threshold)
-    if not (
-        _same_binary(cm.check_matrix, raw.check_matrix[:, col_to_dem])
-        and np.array_equal(cm.error_priors, p_raw[col_to_dem])
-    ):
-        raise RuntimeError("pruned matrices do not match the expected kept columns")
-    if decided.any():
-        logger.warning(
-            "decided error mechanisms pruned",
-            extra={
-                "pruned_p0": int(np.sum(p_raw <= 0.0 + prune_threshold)),
-                "pruned_p1": int(np.sum(p_raw >= 1.0 - prune_threshold)),
-                "threshold": prune_threshold,
-            },
-        )
-
-    h_indptr, h_indices = _to_csr(cm.check_matrix)
-    a_indptr, a_indices = _to_csr(cm.observables_matrix)
-    m, n = cm.check_matrix.shape
+    h_indptr, h_indices = problem.h_indptr, problem.h_indices
+    a_indptr, a_indices = problem.a_indptr, problem.a_indices
+    m, n = problem.num_detectors, problem.num_columns
     row_degree = np.diff(h_indptr.astype(np.int64))
-    col_degree = np.diff(sp.csc_matrix(cm.check_matrix).indptr)
+    col_degree = np.bincount(h_indices, minlength=n)
     if row_degree.min() == 0 or col_degree.min() == 0:
         logger.warning(
             "empty rows or columns in H",
@@ -188,16 +171,16 @@ def export_artifact(circuit_path: Path, out: Path, prune_threshold: float = 0.0)
         "H_indices.npy": h_indices,
         "A_indptr.npy": a_indptr,
         "A_indices.npy": a_indices,
-        "priors.npy": np.ascontiguousarray(cm.error_priors, dtype=np.float64),
-        "col_to_dem.npy": col_to_dem,
+        "priors.npy": problem.priors,
+        "col_to_dem.npy": problem.col_to_dem,
         "det_check.npy": coord_array[:, 0].astype(np.int32),
         "det_round.npy": coord_array[:, 1].astype(np.int32),
         "det_type.npy": coord_array[:, 2].astype(np.uint8),
     }
-    if cm.syndrome_bias is not None:
-        files["syndrome_bias.npy"] = np.asarray(cm.syndrome_bias, dtype=np.uint8).reshape(-1)
-    if cm.observables_bias is not None:
-        files["observables_bias.npy"] = np.asarray(cm.observables_bias, dtype=np.uint8).reshape(-1)
+    if problem.syndrome_bias is not None:
+        files["syndrome_bias.npy"] = problem.syndrome_bias
+    if problem.observables_bias is not None:
+        files["observables_bias.npy"] = problem.observables_bias
     for name, array in files.items():
         np.save(out / name, array)
 
@@ -207,21 +190,22 @@ def export_artifact(circuit_path: Path, out: Path, prune_threshold: float = 0.0)
         "source_circuit": {"path": str(circuit_path), "sha256": circuit_sha},
         "num_detectors": m,
         "num_columns": n,
-        "num_observables": int(cm.observables_matrix.shape[0]),
+        "num_observables": problem.num_observables,
         "nnz_H": int(h_indices.size),
         "nnz_A": int(a_indices.size),
         "row_degree": _degree_stats(row_degree),
         "column_degree": _degree_stats(col_degree),
-        "prior_range": [float(cm.error_priors.min()), float(cm.error_priors.max())],
+        "prior_range": [float(problem.priors.min()), float(problem.priors.max())],
         "pruning": {
             "threshold": prune_threshold,
-            "columns_in_model": int(p_raw.size),
-            "columns_pruned": int(decided.sum()),
+            "columns_in_model": problem.columns_in_model,
+            "columns_pruned": problem.pruned_p0 + problem.pruned_p1,
         },
-        "from_dem": {"decomposed_hyperedges": None, "prune_decided_errors": True},
+        "conversion": {"parser": "rtd.dem.problem_from_dem", "relay_bp_cross_check": cross_checked},
+        "from_dem": {"decomposed_hyperedges": None, "prune_decided_errors": True} if cross_checked else None,
         "versions": {
-            "relay_bp": _relay_bp_source(),
-            "beliefmatching": version("beliefmatching"),
+            "relay_bp": _relay_bp_source() if cross_checked else None,
+            "beliefmatching": _optional_version("beliefmatching"),
             "stim": stim.__version__,
             "numpy": np.__version__,
             "scipy": version("scipy"),
@@ -262,11 +246,6 @@ def main(argv: list[str] | None = None) -> int:
         if not 0.0 <= args.prune_threshold < 0.5:
             raise ValueError(f"--prune-threshold must be in [0, 0.5), got {args.prune_threshold}")
         export_artifact(args.circuit, args.out, args.prune_threshold)
-    except ImportError:
-        logger.exception(
-            "relay_bp is not installed; run `uv sync --group reference`", extra={"cli_args": cli_args}
-        )
-        return 1
     except Exception:
         logger.exception("run failed", extra={"cli_args": cli_args})
         return 1

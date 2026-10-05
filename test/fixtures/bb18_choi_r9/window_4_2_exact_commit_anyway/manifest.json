@@ -1,0 +1,210 @@
+{
+  "format_version": 1,
+  "created": "2026-09-29T07:57:00.647560+00:00",
+  "artifact": {
+    "path": "test/fixtures/bb18_choi_r9/artifact",
+    "manifest_sha256": "a821afa5f5252bb96412bcf39b82ce7535fcf7c557978faa9c459494aa8add80"
+  },
+  "shots": {
+    "path": "test/fixtures/bb18_choi_r9/shots",
+    "first": 0,
+    "count": 100,
+    "detectors_sha256": "70338c97a24d300aa91ae055dad56b0212f16eedc17b55965cdd4de40d124902",
+    "observables_sha256": "14eacef9d00863db835a52c63d72acbc0dd9c54d12630cf08c81dbc6a1baa323"
+  },
+  "first": 0,
+  "count": 100,
+  "rounds": 9,
+  "window": {
+    "mode": "sliding",
+    "width": 4,
+    "commit": 2,
+    "converge_rounds": 4,
+    "boundary": "exact",
+    "on_failure": "commit_anyway",
+    "max_deferrals": 0,
+    "iteration_cap": null
+  },
+  "decoder": {
+    "float": "f32",
+    "gamma0": 0.125,
+    "pre_iter": 80,
+    "set_max_iter": 60,
+    "num_sets": 50,
+    "stopping": {
+      "rule": "after_n_converged",
+      "count": 3
+    },
+    "alpha": {
+      "rule": "constant",
+      "value": 1.0
+    },
+    "inner": "relay_bp, one freshly constructed decoder per window decode"
+  },
+  "gamma": {
+    "rows": 3,
+    "seed": 17,
+    "low": -0.24,
+    "high": 0.66
+  },
+  "config": {
+    "check_matrix": "window shape H as scipy.sparse.csr_matrix, uint8",
+    "error_priors": "window shape priors",
+    "alpha": null,
+    "alpha_iteration_scaling_factor": 1.0,
+    "gamma0": 0.125,
+    "data_scale_value": null,
+    "max_data_value": null,
+    "pre_iter": 80,
+    "num_sets": 50,
+    "set_max_iter": 60,
+    "gamma_dist_interval": [
+      -0.24,
+      0.66
+    ],
+    "explicit_gammas": "gammas/shape_<i>.npy",
+    "stop_nconv": 3,
+    "stopping_criterion": "nconv",
+    "logging": true,
+    "seed": 0,
+    "gamma_table": {
+      "rows": 3,
+      "seed": 17,
+      "interval": [
+        -0.24,
+        0.66
+      ],
+      "generator": "numpy.random.default_rng([seed, shape]).uniform(interval[0], interval[1], size=(rows, shape_columns))",
+      "leg_row": "relay leg r >= 1 uses row r mod rows"
+    }
+  },
+  "num_shapes": 3,
+  "num_positions": 4,
+  "plan": {
+    "spec": {
+      "width": 4,
+      "commit": 2,
+      "converge_rounds": 4,
+      "boundary": "exact",
+      "on_failure": "commit_anyway",
+      "max_deferrals": 0
+    },
+    "rounds_total": 10,
+    "detectors_per_round": 18,
+    "num_positions": 4,
+    "shapes": [
+      {
+        "index": 0,
+        "rows": 72,
+        "columns": 2637,
+        "edges": 13662,
+        "merged_columns": 81
+      },
+      {
+        "index": 1,
+        "rows": 72,
+        "columns": 2664,
+        "edges": 13815,
+        "merged_columns": 81
+      },
+      {
+        "index": 2,
+        "rows": 72,
+        "columns": 2295,
+        "edges": 12465,
+        "merged_columns": 0
+      }
+    ],
+    "placements": [
+      {
+        "window": 0,
+        "attempt": 0,
+        "shape": 0,
+        "first_round": 1,
+        "rounds": 4,
+        "commit_rounds": 2,
+        "final": false
+      },
+      {
+        "window": 1,
+        "attempt": 0,
+        "shape": 1,
+        "first_round": 3,
+        "rounds": 4,
+        "commit_rounds": 2,
+        "final": false
+      },
+      {
+        "window": 2,
+        "attempt": 0,
+        "shape": 1,
+        "first_round": 5,
+        "rounds": 4,
+        "commit_rounds": 2,
+        "final": false
+      },
+      {
+        "window": 3,
+        "attempt": 0,
+        "shape": 2,
+        "first_round": 7,
+        "rounds": 4,
+        "commit_rounds": 4,
+        "final": true
+      }
+    ]
+  },
+  "weights": "math.log((1 - p) / p) per local column, summed in ascending local index",
+  "skipped_windows": "after a final placement is committed the remaining positions are not decoded; their records are those of an empty window (attempts 0, converged 1, all counts 0)",
+  "shots_dir_compat": "sha256['circuit.stim'] is the artifact's source-circuit checksum (the circuit is not copied), so this directory is accepted as rtd_decode --shots",
+  "relay_bp": {
+    "version": "0.2.2",
+    "commit": "d185194ba0cb4101ced4340d82b2ee6d42f225f0"
+  },
+  "versions": {
+    "numpy": "2.5.3",
+    "scipy": "1.18.1",
+    "rtd": "0.1.0"
+  },
+  "timing": {
+    "decode_seconds": 29.749829269000656,
+    "total_seconds": 29.982422670000233,
+    "workers": 2
+  },
+  "summary": {
+    "shots": 100,
+    "windows_decoded": 400,
+    "windows_not_converged": 27,
+    "windows_deferred": 0,
+    "windows_skipped_after_final": 0,
+    "shots_all_windows_converged": 86,
+    "flagged_shots": 0,
+    "logical_failures": 88,
+    "virtual_commits": 0,
+    "mean_iterations_per_shot": 2692.82,
+    "max_window_iterations": 3080
+  },
+  "sha256": {
+    "circuit.stim": "1be222a3042d01517fae5e417c43e087a438c26137e9f3752a940e9b29956f2f",
+    "commit_faults.npy": "4ca27921af48c7e6eacdba99f5019d9176e725e3054375ebbce84fc9e9ca146d",
+    "commit_ptr.npy": "0fb100a822aca1087a64ecd0a5615dd636d3950f11ffd1ed70c67c67445553ad",
+    "detectors.npy": "70338c97a24d300aa91ae055dad56b0212f16eedc17b55965cdd4de40d124902",
+    "flagged.npy": "e045be5525402f8545d5f7024cdb828abedd7bd500cfa5ac6bca4e280aaaf5c5",
+    "gammas/shape_0.npy": "779a9141f9db55a697499d89d3a3f10a69d904f781b25558d343550704511029",
+    "gammas/shape_1.npy": "c644c4181554c186d114d7a105eb661c99123797f23349eab371740d8996f472",
+    "gammas/shape_2.npy": "d3b39fbd2922d094d771c82193f22c4ad56686dc5c9264333177602b170a2f51",
+    "logical_failure.npy": "e940b469436a3a4beb69bf9ffa765108eefb85b66971a2ca5e6cb058902966b2",
+    "observables.npy": "14eacef9d00863db835a52c63d72acbc0dd9c54d12630cf08c81dbc6a1baa323",
+    "predicted_observables.npy": "2532bd2382be3a9ff878874c823457622eadbb3932c305fe39bec7107d672b69",
+    "spec.json": "d0440126de823f825c9e1ac4e5a620bad5914dddad1c2d89d2bd1e0473e7d70c",
+    "win_attempts.npy": "7e1bc362dfdb8a3c8b5cffecf2a4f415188fdd404cffdbd76b7297b637bcc74f",
+    "win_committed_weight.npy": "db99e374bb06aa079629e3695152ad532e4190e7eedbd6faeca4331f25aa06dd",
+    "win_converged.npy": "f73e5085af58647ea9f1da7b07d1cd64f07a8960f0b34d2026a7364e1007dfaa",
+    "win_flagged.npy": "5366fc7cdd2a5d66893601b2337c573c2f590bcf31e1a19393b17d1a784bf56b",
+    "win_iterations.npy": "39fc697a051e5ef62f5d0c220adb2e1112a6a917d1b57bd4ddfca6210908ac4c",
+    "win_legs.npy": "5752ec233bbf7a64e86198f27d7d7db6600428325907688da4bbdf4eebcfd821",
+    "win_unexplained.npy": "4228c81924e773bc64cdf4a5be8ff048fcb0435ffb3aa61e8fef78e99ba2899b",
+    "win_virtual.npy": "aef79e3c8ae1bc6a9a69971b5d592265f94a3502a5116afc272f3ebf611b067b",
+    "win_weight.npy": "c58b6edd1926bf26b9f9f928b75c53e8c9840ef0e7fcf6a837155103c9d00c6d"
+  }
+}
