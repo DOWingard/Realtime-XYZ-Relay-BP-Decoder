@@ -1,22 +1,88 @@
 # rtd — an XYZ-Relay-BP decoder for qLDPC codes
 
-`rtd` is a C++23 implementation of Relay-BP (Müller et al., *Improved belief propagation is
-sufficient for real-time decoding of quantum memory*, arXiv:2506.01779), built to decode the
-circuit-level noise of the [[144,12,12]] bivariate bicycle ("gross") code, with a Python pipeline
-that generates the decoding problems and the reference outputs it is tested against.
+`rtd` is a C++23 decoder for the circuit-level noise of quantum low-density parity-check (qLDPC)
+memories, implementing **Relay-BP** (Müller et al., *Improved belief propagation is sufficient for
+real-time decoding of quantum memory*, arXiv:2506.01779) on the full **XYZ** problem: the X-type and
+Z-type detectors of a syndrome-extraction circuit are decoded together, so the correlations that
+Y errors create between the two bases are kept. It targets the [[144,12,12]] bivariate bicycle
+("gross") code and is built around the architecture that real-time operation needs:
 
-- **Bit-exact** with the reference implementation `relay_bp` on identical inputs: the same
-  correction ê, convergence flag, iteration count, solution weight, per-leg record and final
-  marginals, bit for bit, for plain min-sum, memory BP and Relay-BP in 32- and 64-bit floats.
-- **About 10× faster per iteration** on one core, and faster still with a thread team on one
-  decoding problem (numbers below).
-- A batch driver with a fully specified configuration file, per-shot timing, logical error rates
-  with confidence intervals and a provenance record for every run.
-- Sliding-window decoding, a selection policy with confidence signals, and an integer
-  (fixed-point) arithmetic matching IBM's FPGA format, each reproduced against a Python reference
-  and benchmarked (see [Benchmarking](#benchmarking)).
+- a **streaming sliding-window decoder** fed one syndrome round at a time, which decodes a window
+  as soon as its rounds are available and commits the faults that have left it;
+- **fixed-point arithmetic** (`intN.S.M`) that reproduces, bit for bit, an emulation of the integer
+  format of IBM's FPGA Relay-BP decoder (Maurer et al., arXiv:2510.21600);
+- a **selection policy and confidence signals** (a logical-class gap between competing solutions)
+  with which a controller can switch decoders, defer a window or discard a shot;
+- a **fast CPU backend**: about 10× faster per iteration than the reference implementation on one
+  core, with an optional thread team on a single decoding problem.
 
-## The problem being solved
+The repository also contains the Python pipeline that generates the circuits, samples the shots and
+exports the decoding problems, and a benchmark suite that measures the decoder against published
+results (see [Benchmarking](#benchmarking)).
+
+## Project status
+
+| Component | Status |
+|---|---|
+| Relay-BP, memory BP and min-sum, f32 and f64, whole-shot decoding | Complete. Bit-identical to IBM's reference implementation `relay_bp` on every golden test |
+| Sliding-window and streaming decoding | Complete. Bit-identical to a Python reference; XZ study finished, XYZ confirmation running |
+| Selection policy and confidence signals | Complete (spec version 3); replay tool for recorded solutions |
+| Fixed-point arithmetic (int4, int5, int6) | Complete on CPU. Bit-identical to a Python integer emulator; accuracy checked against Maurer et al. |
+| Python bindings (`rtd.RelayDecoder`, `rtd.WindowedDecoder`) and a `sinter` adapter | Complete (`-DRTD_ENABLE_PYTHON=ON`) |
+| CUDA backend | Not implemented: the interface and a stub compile |
+| FPGA implementation | Not part of this repository; a resource and timing model only |
+
+**Real-time performance.** This is a software decoder, and on a CPU it is not yet fast enough to
+keep up with a superconducting quantum computer. The fastest configuration (a team of six threads on
+a Ryzen 5 3600) needs about 4.4 ms of wall time per syndrome round at p = 3·10⁻³, against a budget of
+about 1 µs per round: one iteration here takes about 5,700 times as long as the 20 ns per iteration
+that the paper's real-time budget assumes for an FPGA. What the repository provides is the
+algorithm, the windowing, the tail-latency statistics and the arithmetic needed to build a real-time
+decoder, validated against published results; see
+[Real-time operation of windows](#real-time-operation-of-windows) for what the measured iteration
+counts imply on hardware.
+
+## Contents
+
+1. [Quick start](#quick-start)
+2. [Background](#background)
+3. [Requirements](#requirements) and [Building and testing](#building-and-testing)
+4. [Decoding shots: `rtd_decode`](#decoding-shots-rtd_decode)
+5. [Sliding-window decoding](#sliding-window-decoding),
+   [selection policy](#selection-policy-and-confidence-spec-version-3) and
+   [fixed-point arithmetic](#fixed-point-arithmetic-intnsm)
+6. [Tools](#replaying-recorded-solutions-rtd_select_replay): `rtd_select_replay`, `rtd_window_plan`, `rtd_bench`
+7. [Decoding in memory: `rtd_api` and the Python module](#decoding-in-memory-rtd_api-and-the-python-module)
+8. [Design](#design)
+9. [Benchmarking](#benchmarking)
+10. [References](#references)
+11. [License](#license)
+
+## Quick start
+
+```sh
+# 1. Build the decoder and run the tests.
+cmake --preset release && cmake --build --preset release && ctest --preset release
+
+# 2. Generate a decoding problem and shots for the gross code (needs uv; see python/README.md).
+cd python && uv sync
+uv run rtd-sample --code gross --experiment choi --p 0.003 --relay-bp-compat \
+    --shots 10000 --seed 12345 --out ../data/shots/gross_choi_p0.003
+uv run rtd-export --circuit ../data/shots/gross_choi_p0.003/circuit.stim \
+    --out ../data/artifacts/gross_choi_p0.003
+cd ..
+
+# 3. Decode with XYZ-Relay-BP-5 and read the logical error rate from run.json.
+build/release/src/rtd_decode --artifact data/artifacts/gross_choi_p0.003 \
+    --shots data/shots/gross_choi_p0.003 --config configs/xyz_relay5_f32.json \
+    --out data/runs/relay5 --workers 6
+```
+
+`configs/` holds ready-made decoder specifications: plain min-sum, XYZ-Relay-BP-5 in float32 (also
+with a thread team) and XZ-Relay-BP-5. Decoding from Python, windowed and streaming decoding and the
+fixed-point formats are described below and in `python/README.md`.
+
+## Background
 
 A syndrome-extraction circuit repeated R times produces m detectors (parity checks of measurement
 outcomes that are 0 in the absence of faults) and has n possible elementary faults. Their relation
@@ -865,3 +931,21 @@ recorded solutions, XZ fixed point at p = 2, 3, 4·10⁻³ and the windowed int4
 yet analysed: the XYZ confirmation of the window study at R = 12 and R = 48, the XYZ int6 point at
 p = 3·10⁻³, and and quiet single-worker timing cells for the round-count study. Not built: the CUDA
 backend (the interface and a stub compile; the development machine has no NVIDIA GPU) and any FPGA implementation; the hardware numbers above are from the model.
+
+## References
+
+- Müller et al., *Improved belief propagation is sufficient for real-time decoding of quantum
+  memory*, arXiv:2506.01779 (Relay-BP and the IBM reference implementation `relay_bp`).
+- Maurer et al., *Real-time decoding of the gross code memory with FPGAs*, arXiv:2510.21600 (the
+  integer formats and sliding-window schedule reproduced here).
+- S. Bravyi et al., *High-threshold and low-overhead fault-tolerant quantum memory*, Nature 627
+  (2024) (the gross code and its circuits).
+- Lee, English and Bartlett, arXiv:2510.05795 (sliding-window BP+LSD and cluster-based
+  post-selection on the gross code, reproduced in the benchmarks).
+- Skoric et al., arXiv:2209.08552 (sliding-window decoding with matching).
+- Maurya et al. and Beverland et al.: the published Relay-BP iteration-count and failure-rate
+  curves used as benchmark anchors.
+
+## License
+
+Copyright 2026 Derek Wingard. Licensed under the Apache License, Version 2.0; see [LICENSE](LICENSE).
